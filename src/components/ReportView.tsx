@@ -45,7 +45,7 @@ export default function ReportView({ result, onReset }: ReportViewProps) {
   const vColor = verdictColor(result.verdict);
 
   const copyReport = () => {
-    const text = `SlabReady Report\n${result.card_name} — ${result.set_name}\nPredicted: ${result.grade_prediction.label}\nOverall: ${result.overall_score}/10\nCentering: ${result.scores.centering.score} | Corners: ${result.scores.corners.score} | Edges: ${result.scores.edges.score} | Surface: ${result.scores.surface.score}\nVerdict: ${result.verdict}\n${result.verdict_summary}`;
+    const text = `Trading Card Grader Report\n${result.card_name} — ${result.set_name}\nPredicted: ${result.grade_prediction.label}\nOverall: ${result.overall_score}/10\nCentering: ${result.scores.centering.score} | Corners: ${result.scores.corners.score} | Edges: ${result.scores.edges.score} | Surface: ${result.scores.surface.score}\nVerdict: ${result.verdict}\n${result.verdict_summary}`;
     navigator.clipboard.writeText(text);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
