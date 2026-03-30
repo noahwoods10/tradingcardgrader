@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import type { IdentifyResult } from "@/lib/openai";
+import type { CardPricing } from "@/lib/pricing";
 
 export interface CardDetails {
   cardName: string;
@@ -25,6 +26,8 @@ interface ConfirmViewProps {
   files: File[];
   identifyResult: IdentifyResult | null;
   identifying: boolean;
+  pricing: CardPricing | null;
+  pricingLoading: boolean;
   onBack: () => void;
   onConfirm: (details: CardDetails) => void;
   onSkip: () => void;
@@ -48,6 +51,8 @@ export default function ConfirmView({
   files,
   identifyResult,
   identifying,
+  pricing,
+  pricingLoading,
   onBack,
   onConfirm,
   onSkip,
@@ -163,6 +168,19 @@ export default function ConfirmView({
           {confidence === "MEDIUM" && (
             <p className="text-xs text-amber-400/80 mt-2">
               We think this is correct — please verify before continuing.
+            </p>
+          )}
+
+          {/* Live pricing */}
+          {pricingLoading && (
+            <p className="text-xs text-muted-foreground mt-2 animate-pulse">Fetching market price…</p>
+          )}
+          {pricing && pricing.marketPrice && (
+            <p className="text-xs text-green-400 mt-2">
+              Current market price: ${pricing.marketPrice.toFixed(2)}
+              {pricing.foilMarketPrice && pricing.foilMarketPrice !== pricing.marketPrice && (
+                <span className="text-muted-foreground"> · Foil: ${pricing.foilMarketPrice.toFixed(2)}</span>
+              )}
             </p>
           )}
         </div>

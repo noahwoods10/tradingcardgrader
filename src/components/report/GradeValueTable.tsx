@@ -1,4 +1,5 @@
 import { type GradingResult } from "@/lib/openai";
+import type { CardPricing } from "@/lib/pricing";
 
 interface GradeRow {
   grade: string;
@@ -8,7 +9,13 @@ interface GradeRow {
   color: string;
 }
 
-export default function GradeValueTable({ result }: { result: GradingResult }) {
+export default function GradeValueTable({ result, pricing }: { result: GradingResult; pricing?: CardPricing | null }) {
+  const rawDisplay = pricing?.marketPrice
+    ? `$${pricing.marketPrice.toFixed(2)}`
+    : result.raw_value_estimate;
+  const rawSubtext = pricing && pricing.lowPrice && pricing.highPrice
+    ? `$${pricing.lowPrice.toFixed(2)} – $${pricing.highPrice.toFixed(2)}`
+    : null;
   const rows: GradeRow[] = [
     {
       grade: "PSA 10",
@@ -33,7 +40,7 @@ export default function GradeValueTable({ result }: { result: GradingResult }) {
     },
     {
       grade: "Raw NM",
-      value: result.raw_value_estimate,
+      value: rawDisplay || result.raw_value_estimate,
       multiplier: null,
       probability: 0,
       color: "muted-foreground",
@@ -60,7 +67,12 @@ export default function GradeValueTable({ result }: { result: GradingResult }) {
             style={{ borderLeft: `2px solid hsl(var(--${row.color === "muted-foreground" ? "border" : row.color}))` }}
           >
             <span className={`text-sm font-medium score-${row.color}`}>{row.grade}</span>
-            <span className="text-sm text-right text-foreground">{row.value ? `~${row.value}` : "—"}</span>
+            <div className="text-right">
+              <span className="text-sm text-foreground">{row.value ? (row.value.startsWith("$") ? row.value : `~${row.value}`) : "—"}</span>
+              {row.grade === "Raw NM" && rawSubtext && (
+                <p className="text-[10px] text-muted-foreground">{rawSubtext}</p>
+              )}
+            </div>
             <span className="text-sm text-right text-muted-foreground">{row.multiplier || "—"}</span>
             <div className="flex items-center justify-end gap-2">
               {row.probability > 0 ? (

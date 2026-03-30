@@ -8,6 +8,7 @@ import ReportView from "@/components/ReportView";
 import AuthModal from "@/components/AuthModal";
 import { analyzeCard, identifyCard, clearImageCache, type GradingResult, type IdentifyResult } from "@/lib/openai";
 import { saveAnalysis } from "@/lib/saveAnalysis";
+import { fetchCardPricing, type CardPricing } from "@/lib/pricing";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 
@@ -23,18 +24,28 @@ export default function Index() {
   const [lastFiles, setLastFiles] = useState<File[]>([]);
   const [identifying, setIdentifying] = useState(false);
   const [identifyResult, setIdentifyResult] = useState<IdentifyResult | null>(null);
+  const [pricing, setPricing] = useState<CardPricing | null>(null);
+  const [pricingLoading, setPricingLoading] = useState(false);
 
   const handleFilesSelected = async (files: File[]) => {
     setLastFiles(files);
     setView("confirm");
     setIdentifying(true);
     setIdentifyResult(null);
+    setPricing(null);
 
     try {
       const idResult = await identifyCard(files);
       setIdentifyResult(idResult);
+
+      // Fetch pricing in background after identification
+      if (idResult.card_name) {
+        setPricingLoading(true);
+        fetchCardPricing(idResult.card_name, idResult.set_name || "", idResult.card_number || "")
+          .then((p) => setPricing(p))
+          .finally(() => setPricingLoading(false));
+      }
     } catch {
-      // Silently fail — user can still enter details manually
       setIdentifyResult({ card_name: null, set_name: null, card_number: null, year: null, rarity: null, confidence: "LOW", confidence_note: "Identification failed" });
     } finally {
       setIdentifying(false);
@@ -49,7 +60,7 @@ export default function Index() {
   const handleConfirm = async (details: CardDetails) => {
     setView("loading");
     try {
-      const data = await analyzeCard(lastFiles, details);
+      const data = await analyzeCard(lastFiles, details, pricing);
       setResult(data);
       setView("report");
 
@@ -86,6 +97,8 @@ export default function Index() {
     setLastFiles([]);
     setIdentifyResult(null);
     setIdentifying(false);
+    setPricing(null);
+    setPricingLoading(false);
     clearImageCache();
   };
 
@@ -139,6 +152,8 @@ export default function Index() {
             files={lastFiles}
             identifyResult={identifyResult}
             identifying={identifying}
+            pricing={pricing}
+            pricingLoading={pricingLoading}
             onBack={reset}
             onConfirm={handleConfirm}
             onSkip={handleSkipIdentification}
@@ -147,7 +162,7 @@ export default function Index() {
         {view === "loading" && <LoadingView />}
         {view === "report" && result && (
           <div>
-            <ReportView result={result} onReset={reset} />
+            <ReportView result={result} onReset={reset} pricing={pricing} />
             {!user && (
               <div className="mt-6 slab-card border-border text-center">
                 <p className="text-sm text-muted-foreground">

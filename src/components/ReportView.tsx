@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { type GradingResult } from "@/lib/openai";
+import type { CardPricing } from "@/lib/pricing";
 import PackagingModal from "./PackagingModal";
 import MarketOverview from "./report/MarketOverview";
 import GradeValueTable from "./report/GradeValueTable";
@@ -11,6 +12,7 @@ import ServiceLevelCard from "./report/ServiceLevelCard";
 interface ReportViewProps {
   result: GradingResult;
   onReset: () => void;
+  pricing?: CardPricing | null;
 }
 
 function scoreColor(score: number) {
@@ -49,7 +51,7 @@ function AnimatedBar({ value, max = 10, color }: { value: number; max?: number; 
   );
 }
 
-export default function ReportView({ result, onReset }: ReportViewProps) {
+export default function ReportView({ result, onReset, pricing }: ReportViewProps) {
   const [showPSARef, setShowPSARef] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -196,13 +198,25 @@ export default function ReportView({ result, onReset }: ReportViewProps) {
       {/* Enhanced Financial Analysis */}
       {result.card_identified && result.raw_value_estimate && (
         <div className="space-y-4">
-          <p className="slab-label">Financial Analysis</p>
+          <div className="flex items-center gap-2">
+            <p className="slab-label">Financial Analysis</p>
+            {pricing ? (
+              <span className="inline-flex items-center gap-1.5 text-[10px] font-medium px-2 py-0.5 rounded-full bg-green-500/15 text-green-400">
+                <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+                Live pricing
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1.5 text-[10px] font-medium px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
+                Estimated pricing
+              </span>
+            )}
+          </div>
 
           {/* ROW 1 — Market Overview */}
           <MarketOverview result={result} />
 
           {/* ROW 2 — Grade Value Table */}
-          <GradeValueTable result={result} />
+          <GradeValueTable result={result} pricing={pricing} />
 
           {/* ROW 3 — Cost Breakdown */}
           <CostBreakdown result={result} />
@@ -216,7 +230,13 @@ export default function ReportView({ result, onReset }: ReportViewProps) {
           {/* ROW 6 — Service Level */}
           <ServiceLevelCard result={result} />
 
-          <p className="text-[10px] text-muted-foreground">Prices are estimates based on recent market sales and will vary. Not financial advice.</p>
+          {pricing ? (
+            <p className="text-[10px] text-muted-foreground">
+              Raw prices sourced from TCGPlayer · Updated {pricing.lastUpdated}
+            </p>
+          ) : (
+            <p className="text-[10px] text-muted-foreground">Prices are estimates based on recent market sales and will vary. Not financial advice.</p>
+          )}
         </div>
       )}
 
