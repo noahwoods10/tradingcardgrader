@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import type { IdentifyResult } from "@/lib/openai";
+import type { CardPricing } from "@/lib/pricing";
 
 export interface CardDetails {
   cardName: string;
