@@ -14,7 +14,72 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      grade_analyses: {
+        Row: {
+          card_name: string | null
+          card_number: string | null
+          confidence: string | null
+          created_at: string
+          full_result_json: Json | null
+          grade_label: string | null
+          id: string
+          image_urls: string[] | null
+          overall_score: number | null
+          psa_10_probability: number | null
+          psa_9_probability: number | null
+          psa10_value_estimate: string | null
+          rarity: string | null
+          raw_value_estimate: string | null
+          set_name: string | null
+          user_id: string
+          verdict: string | null
+          weighted_expected_value: string | null
+          year: string | null
+        }
+        Insert: {
+          card_name?: string | null
+          card_number?: string | null
+          confidence?: string | null
+          created_at?: string
+          full_result_json?: Json | null
+          grade_label?: string | null
+          id?: string
+          image_urls?: string[] | null
+          overall_score?: number | null
+          psa_10_probability?: number | null
+          psa_9_probability?: number | null
+          psa10_value_estimate?: string | null
+          rarity?: string | null
+          raw_value_estimate?: string | null
+          set_name?: string | null
+          user_id: string
+          verdict?: string | null
+          weighted_expected_value?: string | null
+          year?: string | null
+        }
+        Update: {
+          card_name?: string | null
+          card_number?: string | null
+          confidence?: string | null
+          created_at?: string
+          full_result_json?: Json | null
+          grade_label?: string | null
+          id?: string
+          image_urls?: string[] | null
+          overall_score?: number | null
+          psa_10_probability?: number | null
+          psa_9_probability?: number | null
+          psa10_value_estimate?: string | null
+          rarity?: string | null
+          raw_value_estimate?: string | null
+          set_name?: string | null
+          user_id?: string
+          verdict?: string | null
+          weighted_expected_value?: string | null
+          year?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
