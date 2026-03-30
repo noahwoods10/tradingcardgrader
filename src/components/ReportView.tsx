@@ -1,6 +1,12 @@
 import { useState } from "react";
 import { type GradingResult } from "@/lib/openai";
 import PackagingModal from "./PackagingModal";
+import MarketOverview from "./report/MarketOverview";
+import GradeValueTable from "./report/GradeValueTable";
+import CostBreakdown from "./report/CostBreakdown";
+import ExpectedValueSummary from "./report/ExpectedValueSummary";
+import HoldVsSellCard from "./report/HoldVsSellCard";
+import ServiceLevelCard from "./report/ServiceLevelCard";
 
 interface ReportViewProps {
   result: GradingResult;
@@ -31,8 +37,6 @@ const categoryColors: Record<string, string> = {
   edges: "category-edges",
   surface: "category-surface",
 };
-
-const probColors = ["green", "blue", "amber", "red"];
 
 function AnimatedBar({ value, max = 10, color }: { value: number; max?: number; color: string }) {
   return (
@@ -103,10 +107,10 @@ export default function ReportView({ result, onReset }: ReportViewProps) {
         </div>
         <div className="grid grid-cols-4 gap-2">
           {[
-            { label: "PSA 10", value: result.probabilities.psa_10, color: probColors[0] },
-            { label: "PSA 9", value: result.probabilities.psa_9, color: probColors[1] },
-            { label: "PSA 8", value: result.probabilities.psa_8, color: probColors[2] },
-            { label: "PSA 7–", value: result.probabilities.psa_7_or_below, color: probColors[3] },
+            { label: "PSA 10", value: result.probabilities.psa_10, color: "green" },
+            { label: "PSA 9", value: result.probabilities.psa_9, color: "blue" },
+            { label: "PSA 8", value: result.probabilities.psa_8, color: "amber" },
+            { label: "PSA 7–", value: result.probabilities.psa_7_or_below, color: "red" },
           ].map((p) => (
             <div key={p.label} className="text-center">
               <p className="text-xs text-muted-foreground mb-1">{p.label}</p>
@@ -189,26 +193,30 @@ export default function ReportView({ result, onReset }: ReportViewProps) {
         )}
       </div>
 
-      {/* ROI */}
+      {/* Enhanced Financial Analysis */}
       {result.card_identified && result.raw_value_estimate && (
-        <div className="slab-card">
-          <p className="slab-label mb-3">Value estimate</p>
-          <div className="space-y-2 text-sm">
-            <Row label="Raw value (NM)" value={`~${result.raw_value_estimate}`} />
-            <div className="border-t border-border" />
-            <Row label="If PSA 9" value={`~${result.psa9_value_estimate}`} highlight />
-            <Row label="If PSA 10" value={`~${result.psa10_value_estimate}`} highlight />
-            <div className="border-t border-border" />
-            <Row label="Weighted expected" value={`~${result.weighted_expected_value}`} />
-            <Row label="Grading fee est." value={`~${result.grading_fee_estimate}`} />
-            <Row label="Net expected uplift" value={`~${result.net_uplift_estimate}`} bold />
-          </div>
-          <div className="mt-3">
-            <span className={`text-sm font-medium score-${vColor}`}>
-              {result.verdict === "SUBMIT" ? "Worth submitting ✓" : result.verdict === "BORDERLINE" ? "Borderline" : "Reconsider"}
-            </span>
-          </div>
-          <p className="text-[10px] text-muted-foreground mt-2">Prices are estimates based on recent market sales and will vary</p>
+        <div className="space-y-4">
+          <p className="slab-label">Financial Analysis</p>
+
+          {/* ROW 1 — Market Overview */}
+          <MarketOverview result={result} />
+
+          {/* ROW 2 — Grade Value Table */}
+          <GradeValueTable result={result} />
+
+          {/* ROW 3 — Cost Breakdown */}
+          <CostBreakdown result={result} />
+
+          {/* ROW 4 — Expected Value Summary */}
+          <ExpectedValueSummary result={result} />
+
+          {/* ROW 5 — Hold vs Sell */}
+          <HoldVsSellCard result={result} />
+
+          {/* ROW 6 — Service Level */}
+          <ServiceLevelCard result={result} />
+
+          <p className="text-[10px] text-muted-foreground">Prices are estimates based on recent market sales and will vary. Not financial advice.</p>
         </div>
       )}
 
@@ -269,15 +277,6 @@ export default function ReportView({ result, onReset }: ReportViewProps) {
       </div>
 
       <PackagingModal open={modalOpen} onClose={() => setModalOpen(false)} />
-    </div>
-  );
-}
-
-function Row({ label, value, highlight, bold }: { label: string; value: string; highlight?: boolean; bold?: boolean }) {
-  return (
-    <div className="flex justify-between">
-      <span className="text-muted-foreground">{label}</span>
-      <span className={`${bold ? "font-medium text-foreground" : highlight ? "text-foreground" : "text-muted-foreground"}`}>{value}</span>
     </div>
   );
 }
