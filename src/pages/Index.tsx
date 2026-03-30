@@ -24,6 +24,8 @@ export default function Index() {
   const [lastFiles, setLastFiles] = useState<File[]>([]);
   const [identifying, setIdentifying] = useState(false);
   const [identifyResult, setIdentifyResult] = useState<IdentifyResult | null>(null);
+  const [pricing, setPricing] = useState<CardPricing | null>(null);
+  const [pricingLoading, setPricingLoading] = useState(false);
 
   const handleFilesSelected = async (files: File[]) => {
     setLastFiles(files);
