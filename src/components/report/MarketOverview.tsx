@@ -1,15 +1,9 @@
 import { type GradingResult } from "@/lib/openai";
 
-function trendColor(trend: string | null) {
-  if (trend === "RISING") return "green";
-  if (trend === "FALLING") return "red";
-  return "muted-foreground";
-}
-
-function trendIcon(trend: string | null) {
-  if (trend === "RISING") return "↑";
-  if (trend === "FALLING") return "↓";
-  return "→";
+function trendBadge(trend: string | null) {
+  if (trend === "RISING") return { color: "green", icon: "↑" };
+  if (trend === "FALLING") return { color: "red", icon: "↓" };
+  return { color: "amber", icon: "→" };
 }
 
 export default function MarketOverview({ result }: { result: GradingResult }) {
