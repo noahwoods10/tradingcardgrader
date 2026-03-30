@@ -112,7 +112,7 @@ export default function SlabCarousel() {
   }, []);
 
   return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none flex justify-around px-4" style={{ opacity: 0.15 }}>
+    <div className="absolute inset-0 overflow-hidden pointer-events-none flex justify-around px-4" style={{ opacity: 0.28 }}>
       {/* Column 1 - scrolls up (visible on both mobile and desktop) */}
       <div className="carousel-col-up flex flex-col gap-4">
         {col1Items.map((idx, i) => (
