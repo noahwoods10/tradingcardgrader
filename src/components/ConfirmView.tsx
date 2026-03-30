@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import type { IdentifyResult } from "@/lib/openai";
 import type { CardPricing } from "@/lib/pricing";
+import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
 
 export interface CardDetails {
   cardName: string;
@@ -139,6 +140,16 @@ export default function ConfirmView({
         ))}
       </div>
 
+      {/* MEDIUM confidence warning */}
+      {confidence === "MEDIUM" && (
+        <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-4 mb-6">
+          <p className="text-sm font-medium text-amber-400 mb-1">⚠ Please verify the card number below</p>
+          <p className="text-xs text-amber-400/70">
+            We want to make sure we have the right version — different versions of the same card can have vastly different values.
+          </p>
+        </div>
+      )}
+
       {/* Identified card display */}
       {identifyResult && confidence !== "LOW" && (
         <div className="slab-card border-border mb-6">
@@ -160,16 +171,15 @@ export default function ConfirmView({
                 {details.rarity && (
                   <span className="text-xs text-muted-foreground">{details.rarity}</span>
                 )}
+                {identifyResult.art_style && (
+                  <span className="text-xs text-purple" style={{ color: "#a78bfa" }}>
+                    {identifyResult.art_style}
+                  </span>
+                )}
               </div>
             </div>
             <ConfidenceBadge level={confidence} />
           </div>
-
-          {confidence === "MEDIUM" && (
-            <p className="text-xs text-amber-400/80 mt-2">
-              We think this is correct — please verify before continuing.
-            </p>
-          )}
 
           {/* Live pricing */}
           {pricingLoading && (
@@ -182,6 +192,23 @@ export default function ConfirmView({
                 <span className="text-muted-foreground"> · Foil: ${pricing.foilMarketPrice.toFixed(2)}</span>
               )}
             </p>
+          )}
+
+          {/* Identification reasoning */}
+          {identifyResult.identification_reasoning && (
+            <Collapsible>
+              <CollapsibleTrigger className="text-xs text-muted-foreground hover:text-foreground transition-colors mt-3 flex items-center gap-1">
+                <span className="underline">How we identified this</span>
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className="transition-transform [[data-state=open]>&]:rotate-180">
+                  <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <p className="text-xs text-muted-foreground mt-2 leading-relaxed bg-[#111] rounded-lg p-3 border border-border">
+                  {identifyResult.identification_reasoning}
+                </p>
+              </CollapsibleContent>
+            </Collapsible>
           )}
         </div>
       )}
