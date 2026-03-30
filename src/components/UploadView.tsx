@@ -67,7 +67,7 @@ export default function UploadView({ onAnalyze }: UploadViewProps) {
           <p className="text-foreground font-medium text-sm">Drag photos here to start</p>
           <p className="text-muted-foreground text-sm">or click to browse files</p>
           <p className="text-[11px] uppercase tracking-[0.08em] text-muted-foreground mt-4">
-            JPG · PNG · WEBP · up to 6 images
+            JPG · PNG · WEBP · up to 20 images
           </p>
           <input
             ref={inputRef}
