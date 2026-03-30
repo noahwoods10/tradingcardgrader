@@ -21,17 +21,21 @@ export default function Index() {
   const [authOpen, setAuthOpen] = useState(false);
   const [lastFiles, setLastFiles] = useState<File[]>([]);
 
-  const handleAnalyze = async (files: File[]) => {
-    setView("loading");
+  const handleFilesSelected = (files: File[]) => {
     setLastFiles(files);
+    setView("confirm");
+  };
+
+  const handleConfirm = async (details: CardDetails) => {
+    setView("loading");
     try {
-      const data = await analyzeCard(files);
+      const data = await analyzeCard(lastFiles, details);
       setResult(data);
       setView("report");
 
       if (user) {
         try {
-          await saveAnalysis(user.id, data, files);
+          await saveAnalysis(user.id, data, lastFiles);
           toast.success("Saved to history");
         } catch {
           toast.error("Failed to save analysis");
