@@ -10,30 +10,21 @@ export default function MarketOverview({ result }: { result: GradingResult }) {
   const hasData = result.market_trend || result.population_note || result.gem_rate_estimate;
   if (!hasData) return null;
 
+  const badge = result.market_trend ? trendBadge(result.market_trend) : null;
+
   return (
     <div className="slab-card">
-      <div className="flex flex-wrap gap-3">
-        {result.market_trend && (() => {
-          const badge = trendBadge(result.market_trend);
-          return (
-            <div className="flex items-center gap-2">
-              <span className={`text-xs px-2.5 py-1 rounded-full score-badge-${badge.color}`}>
-                {badge.icon} {result.market_trend}
-              </span>
-              {result.market_trend_note && (
-                <span className="text-xs text-muted-foreground">{result.market_trend_note}</span>
-              )}
-            </div>
-          );
-        })()}
-            </span>
-            {result.market_trend_note && (
-              <span className="text-xs text-muted-foreground">{result.market_trend_note}</span>
-            )}
-          </div>
-        )}
-      </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
+      {badge && result.market_trend && (
+        <div className="flex flex-wrap items-center gap-2 mb-3">
+          <span className={`text-xs px-2.5 py-1 rounded-full score-badge-${badge.color}`}>
+            {badge.icon} {result.market_trend}
+          </span>
+          {result.market_trend_note && (
+            <span className="text-xs text-muted-foreground">{result.market_trend_note}</span>
+          )}
+        </div>
+      )}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         {result.population_note && (
           <div>
             <p className="slab-label mb-1">Population</p>
