@@ -85,6 +85,7 @@
     background: hsl(var(--border));
   }
   .progress-fill {
-    @apply h-1 rounded-full transition-all duration-600 ease-out;
+    @apply h-1 rounded-full;
+    transition: all 0.6s ease-out;
   }
 }
