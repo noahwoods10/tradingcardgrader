@@ -146,7 +146,7 @@ export interface GradingResult {
 }
 
 export async function analyzeCard(imageFiles: File[]): Promise<GradingResult> {
-  const API_KEY = import.meta.env.VITE_GEMINI_API_KEY || 'AIzaSyBsXxjhDqorQm2zJvFOx_ZqYuXqfaCAGuI';
+  const API_KEY = import.meta.env.VITE_GEMINI_API_KEY || 'AIzaSyC9YmNohAWvr8P8KsYBkrPXTngUG5eCeAc';
   if (!API_KEY) {
     throw new Error("MISSING_API_KEY");
   }
