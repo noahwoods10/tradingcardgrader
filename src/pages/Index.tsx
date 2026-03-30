@@ -110,7 +110,8 @@ export default function Index() {
 
       {/* Main */}
       <main className="flex-1 max-w-[760px] mx-auto px-4 w-full py-8 md:py-16">
-        {view === "upload" && <UploadView onAnalyze={handleAnalyze} />}
+        {view === "upload" && <UploadView onAnalyze={handleFilesSelected} />}
+        {view === "confirm" && <ConfirmView files={lastFiles} onBack={reset} onConfirm={handleConfirm} />}
         {view === "loading" && <LoadingView />}
         {view === "report" && result && (
           <div>
