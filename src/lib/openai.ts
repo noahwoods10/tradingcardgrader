@@ -146,45 +146,50 @@ export interface GradingResult {
 }
 
 export async function analyzeCard(imageFiles: File[]): Promise<GradingResult> {
-  const API_KEY = import.meta.env.VITE_GEMINI_API_KEY || 'AIzaSyD5T4mgsF3KXz-qG1ay-GlMV2cuN46wxIs';
+  const API_KEY = import.meta.env.VITE_OPENAI_API_KEY;
   if (!API_KEY) {
     throw new Error("MISSING_API_KEY");
   }
 
-  const MODEL = 'gemini-2.0-flash';
-  const URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${API_KEY}`;
+  const URL = 'https://api.openai.com/v1/chat/completions';
 
-  const imageParts = await Promise.all(
+  const imageContents = await Promise.all(
     imageFiles.map(async (file) => {
       const base64 = await new Promise<string>((resolve) => {
         const reader = new FileReader();
-        reader.onload = () => resolve((reader.result as string).split(',')[1]);
+        reader.onload = () => resolve(reader.result as string);
         reader.readAsDataURL(file);
       });
       return {
-        inlineData: {
-          mimeType: file.type,
-          data: base64,
+        type: "image_url" as const,
+        image_url: {
+          url: base64,
+          detail: "high" as const,
         },
       };
     })
   );
 
   const requestBody = {
-    contents: [
+    model: "gpt-4o",
+    messages: [
       {
-        parts: [
-          ...imageParts,
+        role: "system",
+        content: SYSTEM_PROMPT,
+      },
+      {
+        role: "user",
+        content: [
+          ...imageContents,
           {
-            text: `You are Trading Card Grader (TCG), an expert PSA card grading analyst. Analyze the uploaded card image(s) and respond with a JSON object only — no markdown, no explanation, just the raw JSON. Follow the system instructions and output schema exactly as defined.\n\n${SYSTEM_PROMPT}\n\nImages provided: ${imageFiles.length}. Respond with valid JSON only.`,
+            type: "text" as const,
+            text: `Analyze the uploaded card image(s) and respond with a JSON object only — no markdown, no explanation, just the raw JSON. Follow the system instructions and output schema exactly as defined.\n\nImages provided: ${imageFiles.length}. Respond with valid JSON only.`,
           },
         ],
       },
     ],
-    generationConfig: {
-      temperature: 0.2,
-      maxOutputTokens: 2048,
-    },
+    temperature: 0.2,
+    max_tokens: 2048,
   };
 
   const controller = new AbortController();
@@ -194,7 +199,10 @@ export async function analyzeCard(imageFiles: File[]): Promise<GradingResult> {
   try {
     response = await fetch(URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${API_KEY}`,
+      },
       body: JSON.stringify(requestBody),
       signal: controller.signal,
     });
@@ -215,7 +223,7 @@ export async function analyzeCard(imageFiles: File[]): Promise<GradingResult> {
   }
 
   const data = await response.json();
-  const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+  const rawText = data.choices?.[0]?.message?.content;
   if (!rawText) {
     throw new Error("PARSE_ERROR");
   }

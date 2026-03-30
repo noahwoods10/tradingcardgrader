@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { type GradingResult } from "@/lib/gemini";
+import { type GradingResult } from "@/lib/openai";
 import PackagingModal from "./PackagingModal";
 
 interface ReportViewProps {
