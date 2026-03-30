@@ -12,7 +12,7 @@ import { toast } from "sonner";
 type View = "upload" | "loading" | "report" | "error";
 
 export default function Index() {
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const [view, setView] = useState<View>("upload");
   const [result, setResult] = useState<GradingResult | null>(null);
