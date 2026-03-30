@@ -3,7 +3,13 @@ import type { Config } from "tailwindcss";
 export default {
   darkMode: ["class"],
   content: ["./pages/**/*.{ts,tsx}", "./components/**/*.{ts,tsx}", "./app/**/*.{ts,tsx}", "./src/**/*.{ts,tsx}"],
-  prefix: "",
+  safelist: [
+    "bg-green", "bg-amber", "bg-red", "bg-blue",
+    "score-green", "score-amber", "score-red",
+    "score-badge-green", "score-badge-amber", "score-badge-red",
+    "border-l-green", "border-l-amber", "border-l-red",
+    "text-green", "text-amber", "text-red", "text-blue",
+  ],
   theme: {
     container: {
       center: true,
