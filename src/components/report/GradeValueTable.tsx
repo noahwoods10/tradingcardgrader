@@ -1,4 +1,5 @@
 import { type GradingResult } from "@/lib/openai";
+import type { CardPricing } from "@/lib/pricing";
 
 interface GradeRow {
   grade: string;
@@ -8,7 +9,13 @@ interface GradeRow {
   color: string;
 }
 
-export default function GradeValueTable({ result }: { result: GradingResult }) {
+export default function GradeValueTable({ result, pricing }: { result: GradingResult; pricing?: CardPricing | null }) {
+  const rawDisplay = pricing?.marketPrice
+    ? `$${pricing.marketPrice.toFixed(2)}`
+    : result.raw_value_estimate;
+  const rawSubtext = pricing && pricing.lowPrice && pricing.highPrice
+    ? `$${pricing.lowPrice.toFixed(2)} – $${pricing.highPrice.toFixed(2)}`
+    : null;
   const rows: GradeRow[] = [
     {
       grade: "PSA 10",
