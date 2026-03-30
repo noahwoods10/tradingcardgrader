@@ -25,6 +25,15 @@ function findingDot(type: string) {
   return "bg-red";
 }
 
+const categoryColors: Record<string, string> = {
+  centering: "category-centering",
+  corners: "category-corners",
+  edges: "category-edges",
+  surface: "category-surface",
+};
+
+const probColors = ["green", "blue", "amber", "red"];
+
 function AnimatedBar({ value, max = 10, color }: { value: number; max?: number; color: string }) {
   return (
     <div className="progress-track mt-2">
@@ -94,10 +103,10 @@ export default function ReportView({ result, onReset }: ReportViewProps) {
         </div>
         <div className="grid grid-cols-4 gap-2">
           {[
-            { label: "PSA 10", value: result.probabilities.psa_10, color: "green" },
-            { label: "PSA 9", value: result.probabilities.psa_9, color: "amber" },
-            { label: "PSA 8", value: result.probabilities.psa_8, color: "red" },
-            { label: "PSA 7–", value: result.probabilities.psa_7_or_below, color: "red" },
+            { label: "PSA 10", value: result.probabilities.psa_10, color: probColors[0] },
+            { label: "PSA 9", value: result.probabilities.psa_9, color: probColors[1] },
+            { label: "PSA 8", value: result.probabilities.psa_8, color: probColors[2] },
+            { label: "PSA 7–", value: result.probabilities.psa_7_or_below, color: probColors[3] },
           ].map((p) => (
             <div key={p.label} className="text-center">
               <p className="text-xs text-muted-foreground mb-1">{p.label}</p>
@@ -119,7 +128,7 @@ export default function ReportView({ result, onReset }: ReportViewProps) {
           const s = result.scores[cat];
           const c = scoreColor(s.score);
           return (
-            <div key={cat} className="slab-card">
+            <div key={cat} className={`slab-card ${categoryColors[cat]}`}>
               <p className="slab-label mb-2">{cat}</p>
               <p className={`text-[22px] font-medium score-${c}`}>{s.score}<span className="text-xs text-muted-foreground"> / 10</span></p>
               <AnimatedBar value={s.score} color={c} />
@@ -204,7 +213,7 @@ export default function ReportView({ result, onReset }: ReportViewProps) {
       )}
 
       {/* Verdict Card */}
-      <div className={`slab-card border-l-2 border-l-${vColor}`}>
+      <div className={`slab-card verdict-glow-${vColor}`}>
         <div className="flex items-center gap-2 mb-2">
           <span className={`score-${vColor} text-sm`}>
             {result.verdict === "SUBMIT" ? "✓" : result.verdict === "BORDERLINE" ? "⚠" : "✕"}

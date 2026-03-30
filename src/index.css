@@ -34,6 +34,7 @@
     --amber: 38 92% 50%;
     --red: 0 84% 60%;
     --blue: 217 91% 60%;
+    --purple: 263 70% 50%;
   }
 }
 
@@ -87,5 +88,79 @@
   .progress-fill {
     @apply h-1 rounded-full;
     transition: all 0.6s ease-out;
+  }
+
+  /* Gradient hero text */
+  .gradient-hero-text {
+    background: linear-gradient(135deg, #7c3aed 0%, #2563eb 50%, #7c3aed 100%);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Gradient CTA button */
+  .btn-gradient {
+    background: linear-gradient(135deg, #7c3aed, #2563eb);
+    color: white;
+    transition: all 0.2s ease;
+    box-shadow: 0 0 20px rgba(124, 58, 237, 0.15);
+  }
+  .btn-gradient:hover {
+    box-shadow: 0 0 30px rgba(124, 58, 237, 0.35), 0 0 60px rgba(37, 99, 235, 0.2);
+  }
+  .btn-gradient:disabled {
+    opacity: 0.3;
+    box-shadow: none;
+  }
+
+  /* Header logo shimmer */
+  .logo-shimmer {
+    background: linear-gradient(90deg, hsl(var(--foreground)) 0%, #7c3aed 40%, #2563eb 60%, hsl(var(--foreground)) 100%);
+    background-size: 300% 100%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: shimmer 4s ease-in-out infinite;
+  }
+  @keyframes shimmer {
+    0%, 100% { background-position: 100% 50%; }
+    50% { background-position: 0% 50%; }
+  }
+
+  /* Verdict glow cards */
+  .verdict-glow-green {
+    border-color: hsl(var(--green) / 0.4);
+    box-shadow: 0 0 20px hsl(var(--green) / 0.08), inset 0 0 20px hsl(var(--green) / 0.03);
+  }
+  .verdict-glow-amber {
+    border-color: hsl(var(--amber) / 0.4);
+    box-shadow: 0 0 20px hsl(var(--amber) / 0.08), inset 0 0 20px hsl(var(--amber) / 0.03);
+  }
+  .verdict-glow-red {
+    border-color: hsl(var(--red) / 0.4);
+    box-shadow: 0 0 20px hsl(var(--red) / 0.08), inset 0 0 20px hsl(var(--red) / 0.03);
+  }
+
+  /* Category score card borders */
+  .category-centering { border-color: hsl(var(--blue) / 0.3); }
+  .category-corners { border-color: hsl(var(--green) / 0.3); }
+  .category-edges { border-color: hsl(var(--amber) / 0.3); }
+  .category-surface { border-color: hsl(var(--purple) / 0.3); }
+
+  /* Slab carousel */
+  @keyframes scroll-up {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(-50%); }
+  }
+  @keyframes scroll-down {
+    0% { transform: translateY(-50%); }
+    100% { transform: translateY(0); }
+  }
+  .carousel-col-up {
+    animation: scroll-up 30s linear infinite;
+  }
+  .carousel-col-down {
+    animation: scroll-down 30s linear infinite;
   }
 }
