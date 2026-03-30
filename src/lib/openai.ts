@@ -146,21 +146,42 @@ export interface GradingResult {
   confidence_note: string;
 }
 
+async function compressImage(file: File, maxDim = 1500, quality = 0.85): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      let { width, height } = img;
+      if (width > maxDim || height > maxDim) {
+        const ratio = maxDim / Math.max(width, height);
+        width = Math.round(width * ratio);
+        height = Math.round(height * ratio);
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) { reject(new Error('Canvas not supported')); return; }
+      ctx.drawImage(img, 0, 0, width, height);
+      resolve(canvas.toDataURL('image/jpeg', quality));
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('Image load failed')); };
+    img.src = url;
+  });
+}
+
 export async function analyzeCard(imageFiles: File[]): Promise<GradingResult> {
   const API_KEY = import.meta.env.VITE_OPENAI_API_KEY;
   if (!API_KEY) {
     throw new Error("MISSING_API_KEY");
   }
 
-  const URL = 'https://api.openai.com/v1/chat/completions';
+  const API_URL = 'https://api.openai.com/v1/chat/completions';
 
   const imageContents = await Promise.all(
     imageFiles.map(async (file) => {
-      const base64 = await new Promise<string>((resolve) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result as string);
-        reader.readAsDataURL(file);
-      });
+      const base64 = await compressImage(file);
       return {
         type: "image_url" as const,
         image_url: {
@@ -174,10 +195,7 @@ export async function analyzeCard(imageFiles: File[]): Promise<GradingResult> {
   const requestBody = {
     model: "gpt-4o",
     messages: [
-      {
-        role: "system",
-        content: SYSTEM_PROMPT,
-      },
+      { role: "system", content: SYSTEM_PROMPT },
       {
         role: "user",
         content: [
@@ -198,7 +216,7 @@ export async function analyzeCard(imageFiles: File[]): Promise<GradingResult> {
 
   let response: Response;
   try {
-    response = await fetch(URL, {
+    response = await fetch(API_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -215,9 +233,9 @@ export async function analyzeCard(imageFiles: File[]): Promise<GradingResult> {
       (e as any).detail = "Request aborted after 120s timeout";
       throw e;
     }
-    const e = new Error("API_ERROR");
+    const e = new Error("NETWORK_ERROR");
     (e as any).statusCode = 0;
-    (e as any).detail = err.message || "Network error";
+    (e as any).detail = "Network error — check your internet connection and try again";
     throw e;
   }
   clearTimeout(timeoutId);
