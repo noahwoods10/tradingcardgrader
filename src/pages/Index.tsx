@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import UploadView from "@/components/UploadView";
+import ConfirmView, { type CardDetails } from "@/components/ConfirmView";
 import LoadingView from "@/components/LoadingView";
 import ReportView from "@/components/ReportView";
 import AuthModal from "@/components/AuthModal";
@@ -9,7 +10,7 @@ import { saveAnalysis } from "@/lib/saveAnalysis";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 
-type View = "upload" | "loading" | "report" | "error";
+type View = "upload" | "confirm" | "loading" | "report" | "error";
 
 export default function Index() {
   const { user, signOut } = useAuth();
@@ -20,17 +21,21 @@ export default function Index() {
   const [authOpen, setAuthOpen] = useState(false);
   const [lastFiles, setLastFiles] = useState<File[]>([]);
 
-  const handleAnalyze = async (files: File[]) => {
-    setView("loading");
+  const handleFilesSelected = (files: File[]) => {
     setLastFiles(files);
+    setView("confirm");
+  };
+
+  const handleConfirm = async (details: CardDetails) => {
+    setView("loading");
     try {
-      const data = await analyzeCard(files);
+      const data = await analyzeCard(lastFiles, details);
       setResult(data);
       setView("report");
 
       if (user) {
         try {
-          await saveAnalysis(user.id, data, files);
+          await saveAnalysis(user.id, data, lastFiles);
           toast.success("Saved to history");
         } catch {
           toast.error("Failed to save analysis");
@@ -105,7 +110,8 @@ export default function Index() {
 
       {/* Main */}
       <main className="flex-1 max-w-[760px] mx-auto px-4 w-full py-8 md:py-16">
-        {view === "upload" && <UploadView onAnalyze={handleAnalyze} />}
+        {view === "upload" && <UploadView onAnalyze={handleFilesSelected} />}
+        {view === "confirm" && <ConfirmView files={lastFiles} onBack={reset} onConfirm={handleConfirm} />}
         {view === "loading" && <LoadingView />}
         {view === "report" && result && (
           <div>

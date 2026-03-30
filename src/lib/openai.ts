@@ -1,5 +1,7 @@
 // Client-side: calls the analyze-card edge function (server-side OpenAI integration)
 
+import type { CardDetails } from "@/components/ConfirmView";
+
 export interface GradingResult {
   card_identified: boolean;
   card_name: string;
@@ -59,7 +61,7 @@ async function compressImage(file: File, maxDim = 1500, quality = 0.85): Promise
   });
 }
 
-export async function analyzeCard(imageFiles: File[]): Promise<GradingResult> {
+export async function analyzeCard(imageFiles: File[], cardDetails?: CardDetails): Promise<GradingResult> {
   const images = await Promise.all(imageFiles.map((file) => compressImage(file)));
 
   const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
@@ -77,7 +79,7 @@ export async function analyzeCard(imageFiles: File[]): Promise<GradingResult> {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${anonKey}`,
       },
-      body: JSON.stringify({ images }),
+      body: JSON.stringify({ images, cardDetails: cardDetails || null }),
       signal: controller.signal,
     });
   } catch (err: any) {

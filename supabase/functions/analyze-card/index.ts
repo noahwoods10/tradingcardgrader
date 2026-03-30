@@ -118,6 +118,31 @@ OUTPUT FORMAT — respond with this exact JSON structure, no other text:
   "confidence_note": "string"
 }`;
 
+function buildUserPrompt(imageCount: number, cardDetails?: any): string {
+  let prompt = `Analyze the uploaded card image(s) and respond with a JSON object only — no markdown, no explanation, just the raw JSON. Follow the system instructions and output schema exactly as defined.\n\nImages provided: ${imageCount}. Respond with valid JSON only.`;
+
+  if (cardDetails) {
+    const parts: string[] = [];
+    if (cardDetails.cardName) parts.push(cardDetails.cardName);
+    if (cardDetails.setName) parts.push(`from ${cardDetails.setName}`);
+    if (cardDetails.cardNumber) parts.push(`card number ${cardDetails.cardNumber}`);
+    if (cardDetails.year) parts.push(cardDetails.year);
+    if (cardDetails.rarity) parts.push(cardDetails.rarity);
+    if (parts.length > 0) {
+      prompt += `\n\nThe user has identified this card as: ${parts.join(", ")}.`;
+    }
+    if (cardDetails.declaredValue) {
+      prompt += ` Declared value: $${cardDetails.declaredValue}.`;
+    }
+    if (cardDetails.gradingCompany && cardDetails.gradingCompany !== "PSA") {
+      prompt += ` Target grading company: ${cardDetails.gradingCompany}.`;
+    }
+    prompt += " Use these details to improve your analysis and ROI estimates. If any fields were left blank, identify them yourself from the images.";
+  }
+
+  return prompt;
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -139,7 +164,7 @@ serve(async (req) => {
   }
 
   try {
-    const { images } = await req.json();
+    const { images, cardDetails } = await req.json();
 
     if (!images || !Array.isArray(images) || images.length === 0) {
       return new Response(JSON.stringify({ error: 'No images provided' }), {
@@ -170,16 +195,16 @@ serve(async (req) => {
         model: 'gpt-4o',
         messages: [
           { role: 'system', content: SYSTEM_PROMPT },
-          {
-            role: 'user',
-            content: [
-              ...imageContents,
-              {
-                type: 'text',
-                text: `Analyze the uploaded card image(s) and respond with a JSON object only — no markdown, no explanation, just the raw JSON. Follow the system instructions and output schema exactly as defined.\n\nImages provided: ${images.length}. Respond with valid JSON only.`,
-              },
-            ],
-          },
+            {
+              role: 'user',
+              content: [
+                ...imageContents,
+                {
+                  type: 'text',
+                  text: buildUserPrompt(images.length, cardDetails),
+                },
+              ],
+            },
         ],
         temperature: 0.2,
         max_tokens: 2048,
