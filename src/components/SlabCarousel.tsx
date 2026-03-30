@@ -72,12 +72,20 @@ export default function SlabCarousel() {
   const [cardImages, setCardImages] = useState<string[]>([]);
 
   useEffect(() => {
-    fetch("https://api.pokemontcg.io/v2/cards?q=rarity:rare+supertype:Pok%C3%A9mon&pageSize=30&orderBy=set.releaseDate")
-      .then((r) => r.json())
-      .then((data) => {
-        if (data?.data?.length) {
-          setCardImages(data.data.map((c: PokemonCard) => c.images.large));
+    const urls = [
+      'https://api.pokemontcg.io/v2/cards?q=rarity:"Special Illustration Rare"&pageSize=12&orderBy=-set.releaseDate',
+      'https://api.pokemontcg.io/v2/cards?q=rarity:"Illustration Rare"&pageSize=8&orderBy=-set.releaseDate',
+      'https://api.pokemontcg.io/v2/cards?q=rarity:"Rare Holo"&pageSize=8&orderBy=set.releaseDate',
+    ];
+    Promise.all(urls.map((u) => fetch(u).then((r) => r.json()).catch(() => ({ data: [] }))))
+      .then((results) => {
+        const all = results.flatMap((r) => (r?.data || []).map((c: PokemonCard) => c.images.large));
+        // Fisher-Yates shuffle
+        for (let i = all.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [all[i], all[j]] = [all[j], all[i]];
         }
+        if (all.length) setCardImages(all);
       })
       .catch(() => {});
   }, []);
@@ -104,7 +112,7 @@ export default function SlabCarousel() {
   }, []);
 
   return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none flex justify-around px-4" style={{ opacity: 0.15 }}>
+    <div className="absolute inset-0 overflow-hidden pointer-events-none flex justify-around px-4" style={{ opacity: 0.28 }}>
       {/* Column 1 - scrolls up (visible on both mobile and desktop) */}
       <div className="carousel-col-up flex flex-col gap-4">
         {col1Items.map((idx, i) => (
@@ -142,7 +150,7 @@ export default function SlabCarousel() {
       <div
         className="absolute inset-0"
         style={{
-          background: "radial-gradient(ellipse at center, transparent 10%, #0a0a0a 70%)",
+          background: "radial-gradient(ellipse at center, transparent 30%, #0a0a0a 85%)",
         }}
       />
     </div>
