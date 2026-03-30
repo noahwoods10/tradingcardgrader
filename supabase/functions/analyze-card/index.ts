@@ -217,7 +217,7 @@ OUTPUT FORMAT — respond with this exact JSON structure, no other text:
   "confidence_note": "string"
 }`;
 
-function buildUserPrompt(imageCount: number, cardDetails?: any): string {
+function buildUserPrompt(imageCount: number, cardDetails?: any, pricing?: any): string {
   let prompt = `Analyze the uploaded card image(s) and respond with a JSON object only — no markdown, no explanation, just the raw JSON. Follow the system instructions and output schema exactly as defined.\n\nImages provided: ${imageCount}. Respond with valid JSON only.`;
 
   if (cardDetails) {
@@ -237,6 +237,17 @@ function buildUserPrompt(imageCount: number, cardDetails?: any): string {
       prompt += ` Target grading company: ${cardDetails.gradingCompany}.`;
     }
     prompt += " Use these details to improve your analysis, value estimates, and service level recommendation. If any fields were left blank, identify them yourself from the images.";
+  }
+
+  if (pricing) {
+    prompt += `\n\nLIVE MARKET DATA from TCGPlayer (fetched just now):`;
+    if (pricing.marketPrice) prompt += ` Raw market price: $${pricing.marketPrice}.`;
+    if (pricing.lowPrice) prompt += ` Low: $${pricing.lowPrice}.`;
+    if (pricing.midPrice) prompt += ` Mid: $${pricing.midPrice}.`;
+    if (pricing.highPrice) prompt += ` High: $${pricing.highPrice}.`;
+    if (pricing.foilMarketPrice) prompt += ` Foil market price: $${pricing.foilMarketPrice}.`;
+    if (pricing.lastUpdated) prompt += ` Last updated: ${pricing.lastUpdated}.`;
+    prompt += ` Use these EXACT figures for the raw value estimate in your financial analysis. These are real current market prices — they override any estimates from your training data. If the live price is significantly different from what you expected, note this in your analysis.`;
   }
 
   return prompt;
