@@ -19,7 +19,7 @@ export default function Index() {
       setView("report");
     } catch (err: any) {
       if (err.message === "MISSING_API_KEY") {
-        setError("This is usually caused by a missing or invalid API key, or a network issue.\n\nCheck that your VITE_GEMINI_API_KEY is set correctly.");
+        setError("This is usually caused by a missing or invalid API key, or a network issue.\n\nCheck that your VITE_OPENAI_API_KEY is set correctly.");
       } else if (err.message === "PARSE_ERROR") {
         setError("The analysis returned an unreadable format.\nThis sometimes happens — please try again.");
       } else if (err.message === "TIMEOUT") {
