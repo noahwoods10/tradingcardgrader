@@ -19,7 +19,7 @@ export default function Index() {
       setView("report");
     } catch (err: any) {
       if (err.message === "MISSING_API_KEY") {
-        setError("This is usually caused by a missing or invalid API key, or a network issue.\n\nCheck that your VITE_GEMINI_API_KEY is set correctly.");
+        setError("This is usually caused by a missing or invalid API key, or a network issue.\n\nCheck that your VITE_OPENAI_API_KEY is set correctly.");
       } else if (err.message === "PARSE_ERROR") {
         setError("The analysis returned an unreadable format.\nThis sometimes happens — please try again.");
       } else if (err.message === "TIMEOUT") {
@@ -27,7 +27,7 @@ export default function Index() {
       } else if (err.message === "RATE_LIMITED") {
         setError("API rate limit reached. Please wait a minute and try again.\n\nThis happens when too many requests are sent in a short time.");
       } else {
-        setError("This is usually caused by a missing or invalid API key, or a network issue.\n\nCheck that your VITE_GEMINI_API_KEY is set correctly.");
+        setError("This is usually caused by a missing or invalid API key, or a network issue.\n\nCheck that your VITE_OPENAI_API_KEY is set correctly.");
       }
       setView("error");
     }
@@ -85,7 +85,7 @@ export default function Index() {
             Market prices are based on recent sales data and will vary.<br />
             PSA grading standards referenced from psacard.com
           </p>
-          <p className="text-[10px] text-muted-foreground mt-3">Powered by Google Gemini</p>
+          <p className="text-[10px] text-muted-foreground mt-3">Powered by OpenAI</p>
         </div>
       </footer>
     </div>
