@@ -79,7 +79,7 @@ export async function analyzeCard(imageFiles: File[], cardDetails?: CardDetails)
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${anonKey}`,
       },
-      body: JSON.stringify({ images }),
+      body: JSON.stringify({ images, cardDetails: cardDetails || null }),
       signal: controller.signal,
     });
   } catch (err: any) {
