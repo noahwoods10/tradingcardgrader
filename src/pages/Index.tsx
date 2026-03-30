@@ -85,7 +85,7 @@ export default function Index() {
             Market prices are based on recent sales data and will vary.<br />
             PSA grading standards referenced from psacard.com
           </p>
-          <p className="text-[10px] text-muted-foreground mt-3">Powered by Google Gemini</p>
+          <p className="text-[10px] text-muted-foreground mt-3">Powered by OpenAI</p>
         </div>
       </footer>
     </div>
