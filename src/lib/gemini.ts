@@ -1,4 +1,4 @@
-export const SYSTEM_PROMPT = `You are SlabReady, an expert PSA card grading analyst. You predict PSA grades for Pokemon TCG and other trading cards by analyzing photos. You have deep knowledge of PSA's official grading standards as updated in 2025.
+export const SYSTEM_PROMPT = `You are Trading Card Grader (TCG), an expert PSA card grading analyst. You predict PSA grades for Pokemon TCG and other trading cards by analyzing photos. You have deep knowledge of PSA's official grading standards as updated in 2025.
 
 PSA GRADING STANDARDS (2025 UPDATED):
 
@@ -176,7 +176,7 @@ export async function analyzeCard(imageFiles: File[]): Promise<GradingResult> {
         parts: [
           ...imageParts,
           {
-            text: `You are SlabReady, an expert PSA card grading analyst. Analyze the uploaded card image(s) and respond with a JSON object only — no markdown, no explanation, just the raw JSON. Follow the system instructions and output schema exactly as defined.\n\n${SYSTEM_PROMPT}\n\nImages provided: ${imageFiles.length}. Respond with valid JSON only.`,
+            text: `You are Trading Card Grader (TCG), an expert PSA card grading analyst. Analyze the uploaded card image(s) and respond with a JSON object only — no markdown, no explanation, just the raw JSON. Follow the system instructions and output schema exactly as defined.\n\n${SYSTEM_PROMPT}\n\nImages provided: ${imageFiles.length}. Respond with valid JSON only.`,
           },
         ],
       },
