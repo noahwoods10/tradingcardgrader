@@ -2,7 +2,7 @@ import { useState } from "react";
 import UploadView from "@/components/UploadView";
 import LoadingView from "@/components/LoadingView";
 import ReportView from "@/components/ReportView";
-import { analyzeCard, type GradingResult } from "@/lib/gemini";
+import { analyzeCard, type GradingResult } from "@/lib/openai";
 
 type View = "upload" | "loading" | "report" | "error";
 
