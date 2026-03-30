@@ -247,7 +247,8 @@ function buildUserPrompt(imageCount: number, cardDetails?: any, pricing?: any): 
     if (pricing.highPrice) prompt += ` High: $${pricing.highPrice}.`;
     if (pricing.foilMarketPrice) prompt += ` Foil market price: $${pricing.foilMarketPrice}.`;
     if (pricing.lastUpdated) prompt += ` Last updated: ${pricing.lastUpdated}.`;
-    prompt += ` Use these EXACT figures for the raw value estimate in your financial analysis. These are real current market prices — they override any estimates from your training data. If the live price is significantly different from what you expected, note this in your analysis.`;
+    prompt += ` Use these EXACT figures for the raw value estimate in your financial analysis. These are real current market prices — they override any estimates from your training data.`;
+    prompt += ` You MUST populate the psa10_value_estimate, psa9_value_estimate, psa8_value_estimate, raw_value_estimate, weighted_expected_value, and net_uplift_estimate fields in your JSON response. Never leave these as null or empty. Use the live TCGPlayer raw price as your raw_value_estimate baseline, then calculate graded values using these multipliers as a guide: PSA 9 is typically 1.2-2x raw for modern cards, PSA 10 is typically 2-5x raw depending on the card. For high-value SIR cards PSA 10 can be 3-6x raw. If the live price is significantly different from what you expected, note this in your analysis.`;
   }
 
   return prompt;

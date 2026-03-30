@@ -9,31 +9,49 @@ interface GradeRow {
   color: string;
 }
 
+function parsePrice(val: string | null | undefined): number | null {
+  if (!val) return null;
+  const m = val.replace(/[^0-9.]/g, '');
+  const n = parseFloat(m);
+  return isNaN(n) ? null : n;
+}
+
+function formatPrice(n: number): string {
+  return `$${n.toFixed(2)}`;
+}
+
 export default function GradeValueTable({ result, pricing }: { result: GradingResult; pricing?: CardPricing | null }) {
-  const rawDisplay = pricing?.marketPrice
-    ? `$${pricing.marketPrice.toFixed(2)}`
-    : result.raw_value_estimate;
+  const rawMarket = pricing?.marketPrice ?? parsePrice(result.raw_value_estimate);
+  const rawDisplay = rawMarket ? formatPrice(rawMarket) : result.raw_value_estimate;
+
+  // Client-side fallback: if AI didn't populate graded values but we have a raw price
+  const rawNum = rawMarket ?? 0;
+  const psa10Display = result.psa10_value_estimate || (rawNum > 0 ? `~${formatPrice(rawNum * 3)}` : null);
+  const psa9Display = result.psa9_value_estimate || (rawNum > 0 ? `~${formatPrice(rawNum * 1.5)}` : null);
+  const psa8Display = result.psa8_value_estimate || (rawNum > 0 ? `~${formatPrice(rawNum * 1.2)}` : null);
+
   const rawSubtext = pricing && pricing.lowPrice && pricing.highPrice
-    ? `$${pricing.lowPrice.toFixed(2)} – $${pricing.highPrice.toFixed(2)}`
+    ? `${formatPrice(pricing.lowPrice)} – ${formatPrice(pricing.highPrice)}`
     : null;
+
   const rows: GradeRow[] = [
     {
       grade: "PSA 10",
-      value: result.psa10_value_estimate,
-      multiplier: result.grade_multipliers?.psa10_vs_raw || null,
+      value: psa10Display,
+      multiplier: result.grade_multipliers?.psa10_vs_raw || (rawNum > 0 ? "~3x" : null),
       probability: result.probabilities.psa_10,
       color: "green",
     },
     {
       grade: "PSA 9",
-      value: result.psa9_value_estimate,
-      multiplier: result.grade_multipliers?.psa9_vs_raw || null,
+      value: psa9Display,
+      multiplier: result.grade_multipliers?.psa9_vs_raw || (rawNum > 0 ? "~1.5x" : null),
       probability: result.probabilities.psa_9,
       color: "blue",
     },
     {
       grade: "PSA 8",
-      value: result.psa8_value_estimate,
+      value: psa8Display,
       multiplier: null,
       probability: result.psa8_probability ?? result.probabilities.psa_8,
       color: "amber",
