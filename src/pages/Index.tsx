@@ -26,6 +26,15 @@ export default function Index() {
   const [identifyResult, setIdentifyResult] = useState<IdentifyResult | null>(null);
   const [pricing, setPricing] = useState<CardPricing | null>(null);
   const [pricingLoading, setPricingLoading] = useState(false);
+  const [confirmLeaveOpen, setConfirmLeaveOpen] = useState(false);
+
+  const handleGoHome = () => {
+    if (view === "loading") {
+      setConfirmLeaveOpen(true);
+    } else {
+      reset();
+    }
+  };
 
   const handleFilesSelected = async (files: File[]) => {
     setLastFiles(files);
