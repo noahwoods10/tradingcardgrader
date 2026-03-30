@@ -41,7 +41,7 @@ export default function Index() {
       // Fetch pricing in background after identification
       if (idResult.card_name) {
         setPricingLoading(true);
-        fetchCardPricing(idResult.card_name, idResult.set_name || "", idResult.card_number || "")
+        fetchCardPricing(idResult.card_name, idResult.set_name || "", idResult.card_number || "", idResult.rarity || undefined)
           .then((p) => setPricing(p))
           .finally(() => setPricingLoading(false));
       }
