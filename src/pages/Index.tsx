@@ -162,7 +162,7 @@ export default function Index() {
         {view === "loading" && <LoadingView />}
         {view === "report" && result && (
           <div>
-            <ReportView result={result} onReset={reset} />
+            <ReportView result={result} onReset={reset} pricing={pricing} />
             {!user && (
               <div className="mt-6 slab-card border-border text-center">
                 <p className="text-sm text-muted-foreground">
