@@ -61,7 +61,7 @@ async function compressImage(file: File, maxDim = 1500, quality = 0.85): Promise
   });
 }
 
-export async function analyzeCard(imageFiles: File[]): Promise<GradingResult> {
+export async function analyzeCard(imageFiles: File[], cardDetails?: CardDetails): Promise<GradingResult> {
   const images = await Promise.all(imageFiles.map((file) => compressImage(file)));
 
   const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
