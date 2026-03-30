@@ -51,7 +51,7 @@ function AnimatedBar({ value, max = 10, color }: { value: number; max?: number; 
   );
 }
 
-export default function ReportView({ result, onReset }: ReportViewProps) {
+export default function ReportView({ result, onReset, pricing }: ReportViewProps) {
   const [showPSARef, setShowPSARef] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [copied, setCopied] = useState(false);
