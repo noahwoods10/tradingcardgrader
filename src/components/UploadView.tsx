@@ -13,7 +13,7 @@ const tips = [
 ];
 
 const howItWorks = [
-  "Upload photos — front, back, raking light shots, corner close-ups",
+  "Upload up to 20 images — front, back, all 4 corners, raking light shots at multiple angles for the most accurate analysis",
   "AI analyzes — centering, corners, edges, and surface scored independently using PSA 2025 standards",
   "Get your report — grade prediction with probability breakdown, ROI estimate, and specific tips",
   "Submit with confidence — know what to expect before you pay grading fees",
@@ -29,7 +29,7 @@ export default function UploadView({ onAnalyze }: UploadViewProps) {
     const arr = Array.from(newFiles).filter((f) =>
       ["image/jpeg", "image/png", "image/webp"].includes(f.type)
     );
-    setFiles((prev) => [...prev, ...arr].slice(0, 6));
+    setFiles((prev) => [...prev, ...arr].slice(0, 20));
   }, []);
 
   const removeFile = (idx: number) => setFiles((prev) => prev.filter((_, i) => i !== idx));
@@ -67,7 +67,7 @@ export default function UploadView({ onAnalyze }: UploadViewProps) {
           <p className="text-foreground font-medium text-sm">Drag photos here to start</p>
           <p className="text-muted-foreground text-sm">or click to browse files</p>
           <p className="text-[11px] uppercase tracking-[0.08em] text-muted-foreground mt-4">
-            JPG · PNG · WEBP · up to 6 images
+            JPG · PNG · WEBP · up to 20 images
           </p>
           <input
             ref={inputRef}

@@ -272,8 +272,8 @@ serve(async (req) => {
       });
     }
 
-    if (images.length > 10) {
-      return new Response(JSON.stringify({ error: 'Too many images (max 10)' }), {
+    if (images.length > 20) {
+      return new Response(JSON.stringify({ error: 'Too many images (max 20)' }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
