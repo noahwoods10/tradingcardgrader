@@ -170,16 +170,16 @@ serve(async (req) => {
         model: 'gpt-4o',
         messages: [
           { role: 'system', content: SYSTEM_PROMPT },
-          {
-            role: 'user',
-            content: [
-              ...imageContents,
-              {
-                type: 'text',
-                text: `Analyze the uploaded card image(s) and respond with a JSON object only — no markdown, no explanation, just the raw JSON. Follow the system instructions and output schema exactly as defined.\n\nImages provided: ${images.length}. Respond with valid JSON only.`,
-              },
-            ],
-          },
+            {
+              role: 'user',
+              content: [
+                ...imageContents,
+                {
+                  type: 'text',
+                  text: buildUserPrompt(images.length, cardDetails),
+                },
+              ],
+            },
         ],
         temperature: 0.2,
         max_tokens: 2048,
