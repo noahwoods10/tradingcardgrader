@@ -187,13 +187,30 @@ export async function analyzeCard(imageFiles: File[]): Promise<GradingResult> {
     },
   };
 
-  const response = await fetch(URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(requestBody),
-  });
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 120000);
+
+  let response: Response;
+  try {
+    response = await fetch(URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(requestBody),
+      signal: controller.signal,
+    });
+  } catch (err: any) {
+    clearTimeout(timeoutId);
+    if (err.name === 'AbortError') {
+      throw new Error("TIMEOUT");
+    }
+    throw new Error("API_ERROR");
+  }
+  clearTimeout(timeoutId);
 
   if (!response.ok) {
+    if (response.status === 429) {
+      throw new Error("RATE_LIMITED");
+    }
     throw new Error("API_ERROR");
   }
 
