@@ -1,6 +1,24 @@
-// Client-side: calls the analyze-card edge function (server-side OpenAI integration)
+// Client-side: calls edge functions for card identification and analysis
 
-import type { CardDetails } from "@/components/ConfirmView";
+export interface CardDetails {
+  cardName: string;
+  setName: string;
+  cardNumber: string;
+  year: string;
+  rarity: string;
+  gradingCompany: string;
+  declaredValue: string;
+}
+
+export interface IdentifyResult {
+  card_name: string | null;
+  set_name: string | null;
+  card_number: string | null;
+  year: string | null;
+  rarity: string | null;
+  confidence: "HIGH" | "MEDIUM" | "LOW";
+  confidence_note: string;
+}
 
 export interface GradingResult {
   card_identified: boolean;
@@ -61,60 +79,115 @@ async function compressImage(file: File, maxDim = 1500, quality = 0.85): Promise
   });
 }
 
-export async function analyzeCard(imageFiles: File[], cardDetails?: CardDetails): Promise<GradingResult> {
-  const images = await Promise.all(imageFiles.map((file) => compressImage(file)));
+// Cache compressed images to avoid recompressing between identify and analyze
+let cachedImages: string[] | null = null;
 
+export async function getCompressedImages(files: File[]): Promise<string[]> {
+  if (!cachedImages) {
+    cachedImages = await Promise.all(files.map((file) => compressImage(file)));
+  }
+  return cachedImages;
+}
+
+export function clearImageCache() {
+  cachedImages = null;
+}
+
+function buildEdgeFunctionUrl(name: string): string {
   const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
-  const anonKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
-  const functionUrl = `https://${projectId}.supabase.co/functions/v1/analyze-card`;
+  return `https://${projectId}.supabase.co/functions/v1/${name}`;
+}
 
+function getAnonKey(): string {
+  return import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+}
+
+function handleFetchError(err: any): never {
+  if (err.name === 'AbortError') {
+    const e = new Error("TIMEOUT");
+    (e as any).detail = "Request aborted after timeout";
+    throw e;
+  }
+  const e = new Error("NETWORK_ERROR");
+  (e as any).detail = "Network error — check your internet connection and try again";
+  throw e;
+}
+
+async function handleResponseError(response: Response): Promise<never> {
+  let detail = `HTTP ${response.status}`;
+  let code = "API_ERROR";
+  try {
+    const errBody = await response.json();
+    detail = errBody?.error || detail;
+    code = errBody?.code || code;
+  } catch { /* ignore */ }
+
+  if (code === "RATE_LIMITED" || response.status === 429) {
+    const e = new Error("RATE_LIMITED");
+    (e as any).detail = detail;
+    throw e;
+  }
+  if (code === "PARSE_ERROR") {
+    throw new Error("PARSE_ERROR");
+  }
+  const e = new Error("API_ERROR");
+  (e as any).detail = detail;
+  throw e;
+}
+
+export async function identifyCard(imageFiles: File[]): Promise<IdentifyResult> {
+  const images = await getCompressedImages(imageFiles);
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 30000);
+
+  let response: Response;
+  try {
+    response = await fetch(buildEdgeFunctionUrl('identify-card'), {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${getAnonKey()}`,
+      },
+      body: JSON.stringify({ images }),
+      signal: controller.signal,
+    });
+  } catch (err: any) {
+    clearTimeout(timeoutId);
+    handleFetchError(err);
+  }
+  clearTimeout(timeoutId);
+
+  if (!response.ok) {
+    await handleResponseError(response);
+  }
+
+  return response.json();
+}
+
+export async function analyzeCard(imageFiles: File[], cardDetails?: CardDetails): Promise<GradingResult> {
+  const images = await getCompressedImages(imageFiles);
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 120000);
 
   let response: Response;
   try {
-    response = await fetch(functionUrl, {
+    response = await fetch(buildEdgeFunctionUrl('analyze-card'), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${anonKey}`,
+        'Authorization': `Bearer ${getAnonKey()}`,
       },
       body: JSON.stringify({ images, cardDetails: cardDetails || null }),
       signal: controller.signal,
     });
   } catch (err: any) {
     clearTimeout(timeoutId);
-    if (err.name === 'AbortError') {
-      const e = new Error("TIMEOUT");
-      (e as any).detail = "Request aborted after 120s timeout";
-      throw e;
-    }
-    const e = new Error("NETWORK_ERROR");
-    (e as any).detail = "Network error — check your internet connection and try again";
-    throw e;
+    handleFetchError(err);
   }
   clearTimeout(timeoutId);
 
   if (!response.ok) {
-    let detail = `HTTP ${response.status}`;
-    let code = "API_ERROR";
-    try {
-      const errBody = await response.json();
-      detail = errBody?.error || detail;
-      code = errBody?.code || code;
-    } catch { /* ignore */ }
-
-    if (code === "RATE_LIMITED" || response.status === 429) {
-      const e = new Error("RATE_LIMITED");
-      (e as any).detail = detail;
-      throw e;
-    }
-    if (code === "PARSE_ERROR") {
-      throw new Error("PARSE_ERROR");
-    }
-    const e = new Error("API_ERROR");
-    (e as any).detail = detail;
-    throw e;
+    await handleResponseError(response);
   }
 
   return response.json();
