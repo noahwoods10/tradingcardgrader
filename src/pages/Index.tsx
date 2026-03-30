@@ -1,46 +1,53 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import UploadView from "@/components/UploadView";
 import LoadingView from "@/components/LoadingView";
 import ReportView from "@/components/ReportView";
+import AuthModal from "@/components/AuthModal";
 import { analyzeCard, type GradingResult } from "@/lib/openai";
+import { saveAnalysis } from "@/lib/saveAnalysis";
+import { useAuth } from "@/hooks/useAuth";
+import { toast } from "sonner";
 
 type View = "upload" | "loading" | "report" | "error";
 
-interface DebugInfo {
-  statusCode: number | null;
-  errorMessage: string | null;
-}
-
 export default function Index() {
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const [view, setView] = useState<View>("upload");
   const [result, setResult] = useState<GradingResult | null>(null);
-  const [error, setError] = useState<string>("");
-  const [debug, setDebug] = useState<DebugInfo>({ statusCode: null, errorMessage: null });
-
-  const keyStatus = import.meta.env.VITE_OPENAI_API_KEY ? "Key found" : "Key missing";
+  const [error, setError] = useState("");
+  const [authOpen, setAuthOpen] = useState(false);
+  const [lastFiles, setLastFiles] = useState<File[]>([]);
 
   const handleAnalyze = async (files: File[]) => {
     setView("loading");
-    setDebug({ statusCode: null, errorMessage: null });
+    setLastFiles(files);
     try {
       const data = await analyzeCard(files);
       setResult(data);
       setView("report");
-    } catch (err: any) {
-      const statusCode = err.statusCode ?? null;
-      const detail = err.detail ?? err.message ?? "Unknown error";
-      setDebug({ statusCode, errorMessage: detail });
 
+      // Auto-save if logged in
+      if (user) {
+        try {
+          await saveAnalysis(user.id, data, files);
+          toast.success("Saved to history");
+        } catch {
+          toast.error("Failed to save analysis");
+        }
+      }
+    } catch (err: any) {
       if (err.message === "MISSING_API_KEY") {
-        setError("This is usually caused by a missing or invalid API key, or a network issue.\n\nCheck that your VITE_OPENAI_API_KEY is set correctly.");
+        setError("API key missing or invalid. Check your VITE_OPENAI_API_KEY.");
       } else if (err.message === "PARSE_ERROR") {
-        setError("The analysis returned an unreadable format.\nThis sometimes happens — please try again.");
+        setError("The analysis returned an unreadable format. Please try again.");
       } else if (err.message === "TIMEOUT") {
-        setError("The analysis took too long to complete.\nPlease try again — this can happen with large images or high traffic.");
+        setError("The analysis took too long. Please try again.");
       } else if (err.message === "RATE_LIMITED") {
-        setError("API rate limit reached. Please wait a minute and try again.\n\nThis happens when too many requests are sent in a short time.");
+        setError("Rate limit reached. Please wait a minute and try again.");
       } else {
-        setError("This is usually caused by a missing or invalid API key, or a network issue.\n\nCheck that your VITE_OPENAI_API_KEY is set correctly.");
+        setError(err.detail || err.message || "Analysis failed. Please try again.");
       }
       setView("error");
     }
@@ -50,27 +57,45 @@ export default function Index() {
     setView("upload");
     setResult(null);
     setError("");
-    setDebug({ statusCode: null, errorMessage: null });
+    setLastFiles([]);
   };
 
   return (
     <div className="min-h-screen flex flex-col">
-      {/* Debug Panel */}
-      <div className="bg-red-600 text-white text-xs font-mono p-3 space-y-1">
-        <p><strong>DEBUG</strong> | API Key: <span className={keyStatus === "Key found" ? "text-green-300" : "text-yellow-300"}>{keyStatus}</span></p>
-        <p>Last API Status: {debug.statusCode !== null ? debug.statusCode : "—"}</p>
-        <p>Last Error: {debug.errorMessage || "—"}</p>
-      </div>
-
       {/* Header */}
       <header className="sticky top-0 z-40 py-4">
         <div className="max-w-[760px] mx-auto px-4 flex items-center justify-between">
-          <span className="text-sm font-medium text-foreground tracking-tight">Trading Card Grader <span className="text-muted-foreground text-[10px] ml-1">TCG</span></span>
-          {view === "upload" && (
-            <a href="#how" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
-              How it works ↓
-            </a>
-          )}
+          <span className="text-sm font-medium text-foreground tracking-tight">
+            Trading Card Grader <span className="text-muted-foreground text-[10px] ml-1">TCG</span>
+          </span>
+          <div className="flex items-center gap-4">
+            {user && (
+              <button
+                onClick={() => navigate("/history")}
+                className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+              >
+                History
+              </button>
+            )}
+            {user ? (
+              <div className="flex items-center gap-3">
+                <span className="text-xs text-muted-foreground hidden sm:inline">{user.email}</span>
+                <button
+                  onClick={() => { const { signOut } = useAuth(); signOut(); }}
+                  className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  Sign out
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => setAuthOpen(true)}
+                className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Sign in
+              </button>
+            )}
+          </div>
         </div>
       </header>
 
@@ -78,14 +103,24 @@ export default function Index() {
       <main className="flex-1 max-w-[760px] mx-auto px-4 w-full py-8 md:py-16">
         {view === "upload" && <UploadView onAnalyze={handleAnalyze} />}
         {view === "loading" && <LoadingView />}
-        {view === "report" && result && <ReportView result={result} onReset={reset} />}
+        {view === "report" && result && (
+          <div>
+            <ReportView result={result} onReset={reset} />
+            {!user && (
+              <div className="mt-6 slab-card border-border text-center">
+                <p className="text-sm text-muted-foreground">
+                  <button onClick={() => setAuthOpen(true)} className="text-foreground hover:underline">Sign in</button>
+                  {" "}to save this analysis to your history
+                </p>
+              </div>
+            )}
+          </div>
+        )}
         {view === "error" && (
           <div className="animate-fade-in flex flex-col items-center justify-center min-h-[50vh] text-center">
-            <p className="text-foreground font-medium text-lg mb-4">
-              {error.includes("unreadable") ? "Unexpected response from AI" : "Analysis failed"}
-            </p>
+            <p className="text-foreground font-medium text-lg mb-4">Analysis failed</p>
             <p className="text-sm text-muted-foreground whitespace-pre-line max-w-md">{error}</p>
-            <div className="mt-6 flex gap-3">
+            <div className="mt-6">
               <button
                 onClick={reset}
                 className="h-10 px-6 rounded-lg bg-primary text-primary-foreground text-sm hover:bg-primary/90 transition-colors"
@@ -100,7 +135,9 @@ export default function Index() {
       {/* Footer */}
       <footer className="py-8 border-t border-border">
         <div className="max-w-[760px] mx-auto px-4 text-center">
-          <p className="text-sm font-medium text-foreground mb-2">Trading Card Grader <span className="text-muted-foreground text-[10px] ml-1">TCG</span></p>
+          <p className="text-sm font-medium text-foreground mb-2">
+            Trading Card Grader <span className="text-muted-foreground text-[10px] ml-1">TCG</span>
+          </p>
           <p className="text-[11px] text-muted-foreground leading-relaxed">
             Not affiliated with PSA. Grade predictions are estimates only — not guarantees.<br />
             Market prices are based on recent sales data and will vary.<br />
@@ -109,6 +146,8 @@ export default function Index() {
           <p className="text-[10px] text-muted-foreground mt-3">Powered by OpenAI</p>
         </div>
       </footer>
+
+      <AuthModal open={authOpen} onClose={() => setAuthOpen(false)} />
     </div>
   );
 }
