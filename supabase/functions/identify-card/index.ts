@@ -37,7 +37,7 @@ serve(async (req) => {
 
     const imageContents = images.map((dataUrl: string) => ({
       type: "image_url",
-      image_url: { url: dataUrl, detail: "low" },
+      image_url: { url: dataUrl, detail: "high" },
     }));
 
     const openaiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -55,13 +55,13 @@ serve(async (req) => {
               ...imageContents,
               {
                 type: 'text',
-                text: 'Look at this trading card image and identify it. Respond with JSON only in this exact format: { "card_name": "string", "set_name": "string", "card_number": "string", "year": "string", "rarity": "string", "confidence": "HIGH" | "MEDIUM" | "LOW", "confidence_note": "string" }. If you cannot identify any field, set it to null. Be concise and fast.',
+                text: `You are an expert Pokemon and TCG card identifier with encyclopedic knowledge of every Pokemon card ever printed. Examine these card images very carefully and identify the card with precision. Look for: the card name printed on the card, the set symbol in the bottom right corner, the card number printed at the bottom, the year in the copyright text at the very bottom of the card, and the rarity symbol. Cross-reference all of these to give the most accurate identification possible. For Pokemon cards specifically: Umbreon ex 161/131 is from Prismatic Evolutions 2025. Charizard ex 199/165 is from Pokemon 151 2023. Use your full knowledge of the Pokemon TCG to identify the set correctly even if the set symbol is partially obscured.${images.length > 1 ? ' Multiple images are provided — focus on the one that most clearly shows the card front for identification.' : ''} Respond with JSON only: { "card_name": "string", "set_name": "string", "card_number": "string", "year": "string", "rarity": "string", "confidence": "HIGH" | "MEDIUM" | "LOW", "confidence_note": "string" }`,
               },
             ],
           },
         ],
-        temperature: 0.1,
-        max_tokens: 300,
+        temperature: 0,
+        max_tokens: 500,
       }),
     });
 
