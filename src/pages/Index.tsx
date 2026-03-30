@@ -64,12 +64,14 @@ export default function Index() {
               {error.includes("unreadable") ? "Unexpected response from AI" : "Analysis failed"}
             </p>
             <p className="text-sm text-muted-foreground whitespace-pre-line max-w-md">{error}</p>
-            <button
-              onClick={reset}
-              className="mt-6 h-10 px-6 rounded-lg border border-border text-foreground text-sm hover:border-muted-foreground transition-colors"
-            >
-              Try again
-            </button>
+            <div className="mt-6 flex gap-3">
+              <button
+                onClick={reset}
+                className="h-10 px-6 rounded-lg bg-primary text-primary-foreground text-sm hover:bg-primary/90 transition-colors"
+              >
+                Start over
+              </button>
+            </div>
           </div>
         )}
       </main>
