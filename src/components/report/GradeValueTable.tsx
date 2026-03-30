@@ -67,7 +67,12 @@ export default function GradeValueTable({ result, pricing }: { result: GradingRe
             style={{ borderLeft: `2px solid hsl(var(--${row.color === "muted-foreground" ? "border" : row.color}))` }}
           >
             <span className={`text-sm font-medium score-${row.color}`}>{row.grade}</span>
-            <span className="text-sm text-right text-foreground">{row.value ? `~${row.value}` : "—"}</span>
+            <div className="text-right">
+              <span className="text-sm text-foreground">{row.value ? (row.value.startsWith("$") ? row.value : `~${row.value}`) : "—"}</span>
+              {row.grade === "Raw NM" && rawSubtext && (
+                <p className="text-[10px] text-muted-foreground">{rawSubtext}</p>
+              )}
+            </div>
             <span className="text-sm text-right text-muted-foreground">{row.multiplier || "—"}</span>
             <div className="flex items-center justify-end gap-2">
               {row.probability > 0 ? (
