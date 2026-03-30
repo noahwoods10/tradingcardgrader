@@ -235,6 +235,23 @@ export default function Index() {
       </footer>
 
       <AuthModal open={authOpen} onClose={() => setAuthOpen(false)} />
+
+      <AlertDialog open={confirmLeaveOpen} onOpenChange={setConfirmLeaveOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Analysis in progress</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to cancel and go home?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Keep waiting</AlertDialogCancel>
+            <AlertDialogAction onClick={() => { setConfirmLeaveOpen(false); reset(); }}>
+              Cancel analysis
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

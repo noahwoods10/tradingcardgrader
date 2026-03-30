@@ -64,13 +64,23 @@ export default function History() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <header className="sticky top-0 z-40 py-4">
+      <header className="sticky top-0 z-40 py-4 bg-background/80 backdrop-blur-sm border-b border-border">
         <div className="max-w-[760px] mx-auto px-4 flex items-center justify-between">
-          <button onClick={() => navigate("/")} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-            ← Back
+          <button
+            onClick={() => navigate("/")}
+            className="text-sm font-medium logo-shimmer tracking-tight cursor-pointer hover:brightness-125 transition-all min-h-[44px] flex items-center"
+          >
+            Trading Card Grader{" "}
+            <span className="text-[10px] ml-1 px-1.5 py-0.5 rounded-full bg-purple/20 inline-block" style={{ color: "#a78bfa" }}>
+              TCG
+            </span>
           </button>
-          <span className="text-sm font-medium text-foreground">Grading History</span>
-          <div className="w-12" />
+          <div className="flex items-center gap-4">
+            <button onClick={() => navigate("/")} className="text-xs text-muted-foreground hover:text-foreground transition-colors min-h-[44px] flex items-center">
+              Home
+            </button>
+            <span className="text-sm font-medium text-foreground">History</span>
+          </div>
         </div>
       </header>
 
