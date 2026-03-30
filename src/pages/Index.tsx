@@ -28,7 +28,6 @@ export default function Index() {
       setResult(data);
       setView("report");
 
-      // Auto-save if logged in
       if (user) {
         try {
           await saveAnalysis(user.id, data, files);
@@ -63,10 +62,13 @@ export default function Index() {
   return (
     <div className="min-h-screen flex flex-col">
       {/* Header */}
-      <header className="sticky top-0 z-40 py-4">
+      <header className="sticky top-0 z-40 py-4 bg-background/80 backdrop-blur-sm border-b border-border">
         <div className="max-w-[760px] mx-auto px-4 flex items-center justify-between">
-          <span className="text-sm font-medium text-foreground tracking-tight">
-            Trading Card Grader <span className="text-muted-foreground text-[10px] ml-1">TCG</span>
+          <span className="text-sm font-medium logo-shimmer tracking-tight">
+            Trading Card Grader{" "}
+            <span className="text-[10px] ml-1 px-1.5 py-0.5 rounded-full bg-purple/20 text-purple inline-block" style={{ color: "#a78bfa" }}>
+              TCG
+            </span>
           </span>
           <div className="flex items-center gap-4">
             {user && (
@@ -123,7 +125,7 @@ export default function Index() {
             <div className="mt-6">
               <button
                 onClick={reset}
-                className="h-10 px-6 rounded-lg bg-primary text-primary-foreground text-sm hover:bg-primary/90 transition-colors"
+                className="h-10 px-6 rounded-lg btn-gradient text-sm font-medium transition-all"
               >
                 Start over
               </button>
@@ -135,8 +137,8 @@ export default function Index() {
       {/* Footer */}
       <footer className="py-8 border-t border-border">
         <div className="max-w-[760px] mx-auto px-4 text-center">
-          <p className="text-sm font-medium text-foreground mb-2">
-            Trading Card Grader <span className="text-muted-foreground text-[10px] ml-1">TCG</span>
+          <p className="text-sm font-medium logo-shimmer mb-2">
+            Trading Card Grader
           </p>
           <p className="text-[11px] text-muted-foreground leading-relaxed">
             Not affiliated with PSA. Grade predictions are estimates only — not guarantees.<br />
