@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import UploadView from "@/components/UploadView";
+import ConfirmView, { type CardDetails } from "@/components/ConfirmView";
 import LoadingView from "@/components/LoadingView";
 import ReportView from "@/components/ReportView";
 import AuthModal from "@/components/AuthModal";
@@ -9,7 +10,7 @@ import { saveAnalysis } from "@/lib/saveAnalysis";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 
-type View = "upload" | "loading" | "report" | "error";
+type View = "upload" | "confirm" | "loading" | "report" | "error";
 
 export default function Index() {
   const { user, signOut } = useAuth();
