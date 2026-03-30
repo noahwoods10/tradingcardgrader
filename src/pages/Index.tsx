@@ -45,6 +45,8 @@ export default function Index() {
         setError("The analysis took too long. Please try again.");
       } else if (err.message === "RATE_LIMITED") {
         setError("Rate limit reached. Please wait a minute and try again.");
+      } else if (err.message === "NETWORK_ERROR") {
+        setError("Network error — check your internet connection and try again.");
       } else {
         setError(err.detail || err.message || "Analysis failed. Please try again.");
       }
