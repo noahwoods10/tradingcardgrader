@@ -81,7 +81,7 @@ export default function Index() {
               <div className="flex items-center gap-3">
                 <span className="text-xs text-muted-foreground hidden sm:inline">{user.email}</span>
                 <button
-                  onClick={() => { const { signOut } = useAuth(); signOut(); }}
+                  onClick={() => signOut()}
                   className="text-xs text-muted-foreground hover:text-foreground transition-colors"
                 >
                   Sign out
