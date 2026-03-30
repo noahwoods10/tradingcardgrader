@@ -26,6 +26,8 @@ interface ConfirmViewProps {
   files: File[];
   identifyResult: IdentifyResult | null;
   identifying: boolean;
+  pricing: CardPricing | null;
+  pricingLoading: boolean;
   onBack: () => void;
   onConfirm: (details: CardDetails) => void;
   onSkip: () => void;
