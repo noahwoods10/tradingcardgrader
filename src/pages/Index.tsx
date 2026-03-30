@@ -152,6 +152,8 @@ export default function Index() {
             files={lastFiles}
             identifyResult={identifyResult}
             identifying={identifying}
+            pricing={pricing}
+            pricingLoading={pricingLoading}
             onBack={reset}
             onConfirm={handleConfirm}
             onSkip={handleSkipIdentification}
