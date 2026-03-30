@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 
 interface PokemonCard {
   id: string;
@@ -22,6 +22,45 @@ const fallbackColors = [
   { from: "#d97706", to: "#dc2626" },
 ];
 
+const API_URLS = [
+  'https://api.pokemontcg.io/v2/cards?q=rarity:"Special Illustration Rare"&pageSize=20&orderBy=-set.releaseDate',
+  'https://api.pokemontcg.io/v2/cards?q=rarity:"Illustration Rare"&pageSize=20&orderBy=-set.releaseDate',
+  'https://api.pokemontcg.io/v2/cards?q=rarity:"Hyper Rare"&pageSize=20&orderBy=-set.releaseDate',
+  'https://api.pokemontcg.io/v2/cards?q=rarity:"Rare Holo" set.series:"Base"&pageSize=15',
+  'https://api.pokemontcg.io/v2/cards?q=rarity:"Rare Holo" set.releaseDate:[2003-01-01 TO 2008-12-31]&pageSize=15',
+  'https://api.pokemontcg.io/v2/cards?q=rarity:"Ultra Rare"&pageSize=20&orderBy=-set.releaseDate',
+  'https://api.pokemontcg.io/v2/cards?q=rarity:"Rare Secret"&pageSize=15&orderBy=-set.releaseDate',
+  'https://api.pokemontcg.io/v2/cards?q=rarity:"Rare Rainbow"&pageSize=15&orderBy=-set.releaseDate',
+];
+
+const REFETCH_INTERVAL = 5 * 60 * 1000;
+
+function shuffle<T>(arr: T[]): T[] {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+async function fetchAllCards(): Promise<string[]> {
+  const results = await Promise.all(
+    API_URLS.map((u) => fetch(u).then((r) => r.json()).catch(() => ({ data: [] })))
+  );
+  const seen = new Set<string>();
+  const images: string[] = [];
+  for (const r of results) {
+    for (const c of r?.data || []) {
+      if (c?.id && c?.images?.large && !seen.has(c.id)) {
+        seen.add(c.id);
+        images.push(c.images.large);
+      }
+    }
+  }
+  return shuffle(images);
+}
+
 function SlabCard({ imageUrl, fallbackIndex, gradeInfo }: {
   imageUrl?: string;
   fallbackIndex: number;
@@ -29,17 +68,12 @@ function SlabCard({ imageUrl, fallbackIndex, gradeInfo }: {
 }) {
   return (
     <div
-      className="w-[154px] h-[224px] md:w-[154px] md:h-[224px] rounded-lg border border-white/10 flex flex-col overflow-hidden shrink-0"
+      className="w-[154px] h-[224px] rounded-lg border border-white/10 flex flex-col overflow-hidden shrink-0"
       style={{ background: "#1a1a1a" }}
     >
       <div className="flex-1 m-2 rounded-sm overflow-hidden">
         {imageUrl ? (
-          <img
-            src={imageUrl}
-            alt=""
-            loading="lazy"
-            className="w-full h-full object-cover"
-          />
+          <img src={imageUrl} alt="" loading="lazy" className="w-full h-full object-cover" />
         ) : (
           <div
             className="w-full h-full"
@@ -51,15 +85,10 @@ function SlabCard({ imageUrl, fallbackIndex, gradeInfo }: {
         )}
       </div>
       <div className="px-2 pb-2">
-        <div
-          className="rounded-sm px-2 py-1.5 flex items-center justify-between"
-          style={{ background: "#1a2744" }}
-        >
+        <div className="rounded-sm px-2 py-1.5 flex items-center justify-between" style={{ background: "#1a2744" }}>
           <p className="text-[9px] text-white font-bold tracking-wider leading-none">PSA</p>
           <div className="text-right">
-            <p className="text-[14px] font-bold leading-none" style={{ color: "#f59e0b" }}>
-              {gradeInfo.grade}
-            </p>
+            <p className="text-[14px] font-bold leading-none" style={{ color: "#f59e0b" }}>{gradeInfo.grade}</p>
             <p className="text-[5px] text-white/60 tracking-wider mt-0.5">{gradeInfo.label}</p>
           </div>
         </div>
@@ -70,88 +99,55 @@ function SlabCard({ imageUrl, fallbackIndex, gradeInfo }: {
 
 export default function SlabCarousel() {
   const [cardImages, setCardImages] = useState<string[]>([]);
+  const intervalRef = useRef<ReturnType<typeof setInterval>>();
+
+  const doFetch = useCallback(() => {
+    fetchAllCards().then((imgs) => { if (imgs.length) setCardImages(imgs); });
+  }, []);
 
   useEffect(() => {
-    const urls = [
-      'https://api.pokemontcg.io/v2/cards?q=rarity:"Special Illustration Rare"&pageSize=12&orderBy=-set.releaseDate',
-      'https://api.pokemontcg.io/v2/cards?q=rarity:"Illustration Rare"&pageSize=8&orderBy=-set.releaseDate',
-      'https://api.pokemontcg.io/v2/cards?q=rarity:"Rare Holo"&pageSize=8&orderBy=set.releaseDate',
-    ];
-    Promise.all(urls.map((u) => fetch(u).then((r) => r.json()).catch(() => ({ data: [] }))))
-      .then((results) => {
-        const all = results.flatMap((r) => (r?.data || []).map((c: PokemonCard) => c.images.large));
-        // Fisher-Yates shuffle
-        for (let i = all.length - 1; i > 0; i--) {
-          const j = Math.floor(Math.random() * (i + 1));
-          [all[i], all[j]] = [all[j], all[i]];
-        }
-        if (all.length) setCardImages(all);
-      })
-      .catch(() => {});
-  }, []);
+    doFetch();
+    intervalRef.current = setInterval(doFetch, REFETCH_INTERVAL);
+    return () => clearInterval(intervalRef.current);
+  }, [doFetch]);
 
-  const assignedGrades = useMemo(
-    () => Array.from({ length: 30 }, (_, i) => grades[i % grades.length]),
-    []
-  );
+  // Split images evenly across 3 columns with no overlap
+  const [col1, col2, col3] = useMemo(() => {
+    if (!cardImages.length) return [[], [], []];
+    const c1: string[] = [], c2: string[] = [], c3: string[] = [];
+    cardImages.forEach((img, i) => {
+      if (i % 3 === 0) c1.push(img);
+      else if (i % 3 === 1) c2.push(img);
+      else c3.push(img);
+    });
+    return [c1, c2, c3];
+  }, [cardImages]);
 
-  // 3 columns of 10 cards each, duplicated for seamless loop
-  const col1Items = useMemo(() => {
-    const items = Array.from({ length: 10 }, (_, i) => i);
-    return [...items, ...items];
-  }, []);
-
-  const col2Items = useMemo(() => {
-    const items = Array.from({ length: 10 }, (_, i) => i + 10);
-    return [...items, ...items];
-  }, []);
-
-  const col3Items = useMemo(() => {
-    const items = Array.from({ length: 10 }, (_, i) => i + 20);
-    return [...items, ...items];
-  }, []);
+  const renderColumn = (images: string[], direction: "up" | "down", colKey: string, hideOnMobile?: boolean) => {
+    // Duplicate for seamless loop
+    const items = images.length ? [...images, ...images] : Array.from({ length: 20 }, () => "");
+    return (
+      <div className={`carousel-col-${direction} flex flex-col gap-4 ${hideOnMobile ? "hidden md:flex" : ""}`}>
+        {items.map((url, i) => (
+          <SlabCard
+            key={`${colKey}-${i}`}
+            imageUrl={url || undefined}
+            fallbackIndex={i}
+            gradeInfo={grades[i % grades.length]}
+          />
+        ))}
+      </div>
+    );
+  };
 
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none flex justify-around px-4" style={{ opacity: 0.28 }}>
-      {/* Column 1 - scrolls up (visible on both mobile and desktop) */}
-      <div className="carousel-col-up flex flex-col gap-4">
-        {col1Items.map((idx, i) => (
-          <SlabCard
-            key={`a-${i}`}
-            imageUrl={cardImages[idx % cardImages.length] || undefined}
-            fallbackIndex={idx}
-            gradeInfo={assignedGrades[idx % assignedGrades.length]}
-          />
-        ))}
-      </div>
-      {/* Column 2 - scrolls down (visible on both mobile and desktop) */}
-      <div className="carousel-col-down flex flex-col gap-4">
-        {col2Items.map((idx, i) => (
-          <SlabCard
-            key={`b-${i}`}
-            imageUrl={cardImages[idx % cardImages.length] || undefined}
-            fallbackIndex={idx}
-            gradeInfo={assignedGrades[idx % assignedGrades.length]}
-          />
-        ))}
-      </div>
-      {/* Column 3 - scrolls up (desktop only) */}
-      <div className="carousel-col-up hidden md:flex flex-col gap-4">
-        {col3Items.map((idx, i) => (
-          <SlabCard
-            key={`c-${i}`}
-            imageUrl={cardImages[idx % cardImages.length] || undefined}
-            fallbackIndex={idx}
-            gradeInfo={assignedGrades[idx % assignedGrades.length]}
-          />
-        ))}
-      </div>
-      {/* Radial fade overlay */}
+      {renderColumn(col1, "up", "a")}
+      {renderColumn(col2, "down", "b")}
+      {renderColumn(col3, "up", "c", true)}
       <div
         className="absolute inset-0"
-        style={{
-          background: "radial-gradient(ellipse at center, transparent 30%, #0a0a0a 85%)",
-        }}
+        style={{ background: "radial-gradient(ellipse at center, transparent 30%, #0a0a0a 85%)" }}
       />
     </div>
   );
