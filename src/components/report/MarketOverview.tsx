@@ -13,10 +13,19 @@ export default function MarketOverview({ result }: { result: GradingResult }) {
   return (
     <div className="slab-card">
       <div className="flex flex-wrap gap-3">
-        {result.market_trend && (
-          <div className="flex items-center gap-2">
-            <span className={`text-xs px-2.5 py-1 rounded-full score-badge-${trendColor(result.market_trend)}`}>
-              {trendIcon(result.market_trend)} {result.market_trend}
+        {result.market_trend && (() => {
+          const badge = trendBadge(result.market_trend);
+          return (
+            <div className="flex items-center gap-2">
+              <span className={`text-xs px-2.5 py-1 rounded-full score-badge-${badge.color}`}>
+                {badge.icon} {result.market_trend}
+              </span>
+              {result.market_trend_note && (
+                <span className="text-xs text-muted-foreground">{result.market_trend_note}</span>
+              )}
+            </div>
+          );
+        })()}
             </span>
             {result.market_trend_note && (
               <span className="text-xs text-muted-foreground">{result.market_trend_note}</span>
