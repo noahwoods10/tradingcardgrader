@@ -29,11 +29,10 @@ function SlabCard({ imageUrl, fallbackIndex, gradeInfo }: {
 }) {
   return (
     <div
-      className="w-[110px] h-[160px] rounded-lg border border-white/10 flex flex-col overflow-hidden shrink-0"
+      className="w-[154px] h-[224px] md:w-[154px] md:h-[224px] rounded-lg border border-white/10 flex flex-col overflow-hidden shrink-0"
       style={{ background: "#1a1a1a" }}
     >
-      {/* Card image area */}
-      <div className="flex-1 m-1.5 rounded-sm overflow-hidden">
+      <div className="flex-1 m-2 rounded-sm overflow-hidden">
         {imageUrl ? (
           <img
             src={imageUrl}
@@ -51,20 +50,17 @@ function SlabCard({ imageUrl, fallbackIndex, gradeInfo }: {
           />
         )}
       </div>
-      {/* PSA label strip */}
-      <div className="px-1.5 pb-1.5">
+      <div className="px-2 pb-2">
         <div
-          className="rounded-sm px-1.5 py-1 flex items-center justify-between"
+          className="rounded-sm px-2 py-1.5 flex items-center justify-between"
           style={{ background: "#1a2744" }}
         >
-          <div>
-            <p className="text-[7px] text-white font-bold tracking-wider leading-none">PSA</p>
-          </div>
+          <p className="text-[9px] text-white font-bold tracking-wider leading-none">PSA</p>
           <div className="text-right">
-            <p className="text-[12px] font-bold leading-none" style={{ color: "#f59e0b" }}>
+            <p className="text-[14px] font-bold leading-none" style={{ color: "#f59e0b" }}>
               {gradeInfo.grade}
             </p>
-            <p className="text-[4px] text-white/60 tracking-wider mt-0.5">{gradeInfo.label}</p>
+            <p className="text-[5px] text-white/60 tracking-wider mt-0.5">{gradeInfo.label}</p>
           </div>
         </div>
       </div>
@@ -76,34 +72,40 @@ export default function SlabCarousel() {
   const [cardImages, setCardImages] = useState<string[]>([]);
 
   useEffect(() => {
-    fetch("https://api.pokemontcg.io/v2/cards?q=rarity:rare+supertype:Pok%C3%A9mon&pageSize=24&orderBy=set.releaseDate")
+    fetch("https://api.pokemontcg.io/v2/cards?q=rarity:rare+supertype:Pok%C3%A9mon&pageSize=30&orderBy=set.releaseDate")
       .then((r) => r.json())
       .then((data) => {
         if (data?.data?.length) {
           setCardImages(data.data.map((c: PokemonCard) => c.images.large));
         }
       })
-      .catch(() => {/* silent fallback */});
+      .catch(() => {});
   }, []);
 
   const assignedGrades = useMemo(
-    () => Array.from({ length: 24 }, (_, i) => grades[i % grades.length]),
+    () => Array.from({ length: 30 }, (_, i) => grades[i % grades.length]),
     []
   );
 
+  // 3 columns of 10 cards each, duplicated for seamless loop
   const col1Items = useMemo(() => {
-    const items = Array.from({ length: 12 }, (_, i) => i);
-    return [...items, ...items]; // duplicate for seamless loop
+    const items = Array.from({ length: 10 }, (_, i) => i);
+    return [...items, ...items];
   }, []);
 
   const col2Items = useMemo(() => {
-    const items = Array.from({ length: 12 }, (_, i) => i + 12);
+    const items = Array.from({ length: 10 }, (_, i) => i + 10);
+    return [...items, ...items];
+  }, []);
+
+  const col3Items = useMemo(() => {
+    const items = Array.from({ length: 10 }, (_, i) => i + 20);
     return [...items, ...items];
   }, []);
 
   return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none flex justify-center gap-4" style={{ opacity: 0.18 }}>
-      {/* Column 1 - scrolls up (single on mobile, left on desktop) */}
+    <div className="absolute inset-0 overflow-hidden pointer-events-none flex justify-around px-4" style={{ opacity: 0.15 }}>
+      {/* Column 1 - scrolls up (visible on both mobile and desktop) */}
       <div className="carousel-col-up flex flex-col gap-4">
         {col1Items.map((idx, i) => (
           <SlabCard
@@ -114,11 +116,22 @@ export default function SlabCarousel() {
           />
         ))}
       </div>
-      {/* Column 2 - scrolls down (hidden on mobile) */}
-      <div className="carousel-col-down hidden md:flex flex-col gap-4">
+      {/* Column 2 - scrolls down (visible on both mobile and desktop) */}
+      <div className="carousel-col-down flex flex-col gap-4">
         {col2Items.map((idx, i) => (
           <SlabCard
             key={`b-${i}`}
+            imageUrl={cardImages[idx % cardImages.length] || undefined}
+            fallbackIndex={idx}
+            gradeInfo={assignedGrades[idx % assignedGrades.length]}
+          />
+        ))}
+      </div>
+      {/* Column 3 - scrolls up (desktop only) */}
+      <div className="carousel-col-up hidden md:flex flex-col gap-4">
+        {col3Items.map((idx, i) => (
+          <SlabCard
+            key={`c-${i}`}
             imageUrl={cardImages[idx % cardImages.length] || undefined}
             fallbackIndex={idx}
             gradeInfo={assignedGrades[idx % assignedGrades.length]}
@@ -129,7 +142,7 @@ export default function SlabCarousel() {
       <div
         className="absolute inset-0"
         style={{
-          background: "radial-gradient(ellipse at center, transparent 15%, #0a0a0a 70%)",
+          background: "radial-gradient(ellipse at center, transparent 10%, #0a0a0a 70%)",
         }}
       />
     </div>
