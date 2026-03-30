@@ -97,6 +97,8 @@ export default function Index() {
     setLastFiles([]);
     setIdentifyResult(null);
     setIdentifying(false);
+    setPricing(null);
+    setPricingLoading(false);
     clearImageCache();
   };
 
