@@ -46,7 +46,7 @@ export default function Index() {
           .finally(() => setPricingLoading(false));
       }
     } catch {
-      setIdentifyResult({ card_name: null, set_name: null, card_number: null, year: null, rarity: null, confidence: "LOW", confidence_note: "Identification failed" });
+      setIdentifyResult({ card_name: null, set_name: null, card_number: null, year: null, rarity: null, art_style: null, confidence: "LOW", confidence_note: "Identification failed", identification_reasoning: null });
     } finally {
       setIdentifying(false);
     }
@@ -54,7 +54,7 @@ export default function Index() {
 
   const handleSkipIdentification = () => {
     setIdentifying(false);
-    setIdentifyResult({ card_name: null, set_name: null, card_number: null, year: null, rarity: null, confidence: "LOW", confidence_note: "Skipped by user" });
+    setIdentifyResult({ card_name: null, set_name: null, card_number: null, year: null, rarity: null, art_style: null, confidence: "LOW", confidence_note: "Skipped by user", identification_reasoning: null });
   };
 
   const handleConfirm = async (details: CardDetails) => {

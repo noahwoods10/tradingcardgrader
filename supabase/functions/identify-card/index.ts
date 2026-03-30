@@ -40,6 +40,33 @@ serve(async (req) => {
       image_url: { url: dataUrl, detail: "high" },
     }));
 
+    const identificationPrompt = `You are an expert Pokemon card identifier. Examine these card images with extreme care and identify every detail precisely. Follow these steps in order:
+
+STEP 1 - Read the card number: Look at the very bottom of the card front for the card number (e.g. 164/181). This is the single most important identifier. Read it character by character. Do not guess.
+
+STEP 2 - Identify the art style: Is this a standard holo, full art, alternate full art, special illustration rare, hyper rare, or secret rare? Full arts and alternate full arts have artwork that extends to the card edges with no white border around the artwork. Standard holos have a white border and a defined illustration box.
+
+STEP 3 - Read the set symbol: Look at the bottom right of the card for the set symbol and identify the set.
+
+STEP 4 - Read the copyright year: Look at the very bottom of the card for the copyright year (e.g. '2019').
+
+STEP 5 - Cross reference: Use the card number, art style, set symbol, and year together to give the most precise identification. For example for Gengar & Mimikyu GX: 53/181 is the standard holo, 164/181 is the full art, 165/181 is the alternate full art. These are completely different cards with completely different values. For Pokemon cards specifically: Umbreon ex 161/131 is from Prismatic Evolutions 2025. Charizard ex 199/165 is from Pokemon 151 2023.
+
+${images.length > 1 ? 'Multiple images are provided — focus on the one that most clearly shows the card front for identification.' : ''}
+
+Respond with JSON only:
+{
+  "card_name": "string",
+  "set_name": "string",
+  "card_number": "string",
+  "year": "string",
+  "rarity": "string",
+  "art_style": "Standard Holo" | "Full Art" | "Alternate Full Art" | "Special Illustration Rare" | "Hyper Rare" | "Secret Rare" | "Other",
+  "confidence": "HIGH" | "MEDIUM" | "LOW",
+  "confidence_note": "string",
+  "identification_reasoning": "string explaining step by step what you saw on the card — the card number you read, the art style you detected, the set symbol, and how you cross-referenced them"
+}`;
+
     const openaiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -53,15 +80,12 @@ serve(async (req) => {
             role: 'user',
             content: [
               ...imageContents,
-              {
-                type: 'text',
-                text: `You are an expert Pokemon and TCG card identifier with encyclopedic knowledge of every Pokemon card ever printed. Examine these card images very carefully and identify the card with precision. Look for: the card name printed on the card, the set symbol in the bottom right corner, the card number printed at the bottom, the year in the copyright text at the very bottom of the card, and the rarity symbol. Cross-reference all of these to give the most accurate identification possible. For Pokemon cards specifically: Umbreon ex 161/131 is from Prismatic Evolutions 2025. Charizard ex 199/165 is from Pokemon 151 2023. Use your full knowledge of the Pokemon TCG to identify the set correctly even if the set symbol is partially obscured.${images.length > 1 ? ' Multiple images are provided — focus on the one that most clearly shows the card front for identification.' : ''} Respond with JSON only: { "card_name": "string", "set_name": "string", "card_number": "string", "year": "string", "rarity": "string", "confidence": "HIGH" | "MEDIUM" | "LOW", "confidence_note": "string" }`,
-              },
+              { type: 'text', text: identificationPrompt },
             ],
           },
         ],
         temperature: 0,
-        max_tokens: 500,
+        max_tokens: 700,
       }),
     });
 

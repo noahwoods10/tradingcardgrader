@@ -94,8 +94,14 @@ export async function fetchCardPricing(
       ? ` rarity:"${rarity}"`
       : '';
 
+    // Extract just the number before the slash for set-specific lookup
+    const numberOnly = cardNumber ? cardNumber.split('/')[0] : null;
+
     const queries = [
-      cardNumber ? `name:"${cardName}" number:"${cardNumber}"${rarityFilter}` : null,
+      // Most specific: card number + set name
+      numberOnly && setName ? `number:"${numberOnly}" set.name:"${setName}"` : null,
+      // Card number + name
+      cardNumber ? `name:"${cardName}" number:"${numberOnly}"${rarityFilter}` : null,
       `name:"${cardName}"${rarityFilter}`,
       `name:"${cardName}"`,
     ].filter(Boolean) as string[];

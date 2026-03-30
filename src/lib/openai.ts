@@ -17,8 +17,10 @@ export interface IdentifyResult {
   card_number: string | null;
   year: string | null;
   rarity: string | null;
+  art_style: string | null;
   confidence: "HIGH" | "MEDIUM" | "LOW";
   confidence_note: string;
+  identification_reasoning: string | null;
 }
 
 export interface GradingResult {
