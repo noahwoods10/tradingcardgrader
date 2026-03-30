@@ -139,7 +139,7 @@ serve(async (req) => {
   }
 
   try {
-    const { images } = await req.json();
+    const { images, cardDetails } = await req.json();
 
     if (!images || !Array.isArray(images) || images.length === 0) {
       return new Response(JSON.stringify({ error: 'No images provided' }), {
