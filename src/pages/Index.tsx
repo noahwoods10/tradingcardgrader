@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import UploadView from "@/components/UploadView";
-import ConfirmView, { type CardDetails } from "@/components/ConfirmView";
+import ConfirmView from "@/components/ConfirmView";
+import type { CardDetails } from "@/components/ConfirmView";
 import LoadingView from "@/components/LoadingView";
 import ReportView from "@/components/ReportView";
 import AuthModal from "@/components/AuthModal";
-import { analyzeCard, type GradingResult } from "@/lib/openai";
+import { analyzeCard, identifyCard, clearImageCache, type GradingResult, type IdentifyResult } from "@/lib/openai";
 import { saveAnalysis } from "@/lib/saveAnalysis";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
@@ -20,10 +21,29 @@ export default function Index() {
   const [error, setError] = useState("");
   const [authOpen, setAuthOpen] = useState(false);
   const [lastFiles, setLastFiles] = useState<File[]>([]);
+  const [identifying, setIdentifying] = useState(false);
+  const [identifyResult, setIdentifyResult] = useState<IdentifyResult | null>(null);
 
-  const handleFilesSelected = (files: File[]) => {
+  const handleFilesSelected = async (files: File[]) => {
     setLastFiles(files);
     setView("confirm");
+    setIdentifying(true);
+    setIdentifyResult(null);
+
+    try {
+      const idResult = await identifyCard(files);
+      setIdentifyResult(idResult);
+    } catch {
+      // Silently fail — user can still enter details manually
+      setIdentifyResult({ card_name: null, set_name: null, card_number: null, year: null, rarity: null, confidence: "LOW", confidence_note: "Identification failed" });
+    } finally {
+      setIdentifying(false);
+    }
+  };
+
+  const handleSkipIdentification = () => {
+    setIdentifying(false);
+    setIdentifyResult({ card_name: null, set_name: null, card_number: null, year: null, rarity: null, confidence: "LOW", confidence_note: "Skipped by user" });
   };
 
   const handleConfirm = async (details: CardDetails) => {
@@ -43,7 +63,7 @@ export default function Index() {
       }
     } catch (err: any) {
       if (err.message === "MISSING_API_KEY") {
-        setError("API key missing or invalid. Check your VITE_OPENAI_API_KEY.");
+        setError("API key missing or invalid.");
       } else if (err.message === "PARSE_ERROR") {
         setError("The analysis returned an unreadable format. Please try again.");
       } else if (err.message === "TIMEOUT") {
@@ -64,6 +84,9 @@ export default function Index() {
     setResult(null);
     setError("");
     setLastFiles([]);
+    setIdentifyResult(null);
+    setIdentifying(false);
+    clearImageCache();
   };
 
   return (
@@ -111,7 +134,16 @@ export default function Index() {
       {/* Main */}
       <main className="flex-1 max-w-[760px] mx-auto px-4 w-full py-8 md:py-16">
         {view === "upload" && <UploadView onAnalyze={handleFilesSelected} />}
-        {view === "confirm" && <ConfirmView files={lastFiles} onBack={reset} onConfirm={handleConfirm} />}
+        {view === "confirm" && (
+          <ConfirmView
+            files={lastFiles}
+            identifyResult={identifyResult}
+            identifying={identifying}
+            onBack={reset}
+            onConfirm={handleConfirm}
+            onSkip={handleSkipIdentification}
+          />
+        )}
         {view === "loading" && <LoadingView />}
         {view === "report" && result && (
           <div>
