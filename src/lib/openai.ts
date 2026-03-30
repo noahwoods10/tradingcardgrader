@@ -1,5 +1,7 @@
 // Client-side: calls the analyze-card edge function (server-side OpenAI integration)
 
+import type { CardDetails } from "@/components/ConfirmView";
+
 export interface GradingResult {
   card_identified: boolean;
   card_name: string;
