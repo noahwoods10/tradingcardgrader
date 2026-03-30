@@ -11,6 +11,16 @@ import { saveAnalysis } from "@/lib/saveAnalysis";
 import { fetchCardPricing, type CardPricing } from "@/lib/pricing";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 type View = "upload" | "confirm" | "loading" | "report" | "error";
 
