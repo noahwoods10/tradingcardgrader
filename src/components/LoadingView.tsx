@@ -10,12 +10,18 @@ const steps = [
 
 export default function LoadingView() {
   const [currentStep, setCurrentStep] = useState(0);
+  const [showSlowMessage, setShowSlowMessage] = useState(false);
 
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentStep((prev) => (prev < steps.length - 1 ? prev + 1 : prev));
     }, 1500);
     return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setShowSlowMessage(true), 15000);
+    return () => clearTimeout(timer);
   }, []);
 
   return (
@@ -48,6 +54,11 @@ export default function LoadingView() {
           />
         </div>
       </div>
+      {showSlowMessage && (
+        <p className="mt-6 text-sm text-muted-foreground animate-fade-in">
+          Still analyzing — this can take up to 30 seconds
+        </p>
+      )}
     </div>
   );
 }

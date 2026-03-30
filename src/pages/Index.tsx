@@ -22,6 +22,10 @@ export default function Index() {
         setError("This is usually caused by a missing or invalid API key, or a network issue.\n\nCheck that your VITE_GEMINI_API_KEY is set correctly.");
       } else if (err.message === "PARSE_ERROR") {
         setError("The analysis returned an unreadable format.\nThis sometimes happens — please try again.");
+      } else if (err.message === "TIMEOUT") {
+        setError("The analysis took too long to complete.\nPlease try again — this can happen with large images or high traffic.");
+      } else if (err.message === "RATE_LIMITED") {
+        setError("API rate limit reached. Please wait a minute and try again.\n\nThis happens when too many requests are sent in a short time.");
       } else {
         setError("This is usually caused by a missing or invalid API key, or a network issue.\n\nCheck that your VITE_GEMINI_API_KEY is set correctly.");
       }
