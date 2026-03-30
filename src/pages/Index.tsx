@@ -32,12 +32,20 @@ export default function Index() {
     setView("confirm");
     setIdentifying(true);
     setIdentifyResult(null);
+    setPricing(null);
 
     try {
       const idResult = await identifyCard(files);
       setIdentifyResult(idResult);
+
+      // Fetch pricing in background after identification
+      if (idResult.card_name) {
+        setPricingLoading(true);
+        fetchCardPricing(idResult.card_name, idResult.set_name || "", idResult.card_number || "")
+          .then((p) => setPricing(p))
+          .finally(() => setPricingLoading(false));
+      }
     } catch {
-      // Silently fail — user can still enter details manually
       setIdentifyResult({ card_name: null, set_name: null, card_number: null, year: null, rarity: null, confidence: "LOW", confidence_note: "Identification failed" });
     } finally {
       setIdentifying(false);
