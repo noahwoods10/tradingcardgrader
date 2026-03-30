@@ -179,7 +179,7 @@ export async function identifyCard(imageFiles: File[]): Promise<IdentifyResult> 
   return response.json();
 }
 
-export async function analyzeCard(imageFiles: File[], cardDetails?: CardDetails): Promise<GradingResult> {
+export async function analyzeCard(imageFiles: File[], cardDetails?: CardDetails, pricing?: CardPricing | null): Promise<GradingResult> {
   const images = await getCompressedImages(imageFiles);
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 120000);
@@ -192,7 +192,7 @@ export async function analyzeCard(imageFiles: File[], cardDetails?: CardDetails)
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${getAnonKey()}`,
       },
-      body: JSON.stringify({ images, cardDetails: cardDetails || null }),
+      body: JSON.stringify({ images, cardDetails: cardDetails || null, pricing: pricing || null }),
       signal: controller.signal,
     });
   } catch (err: any) {
