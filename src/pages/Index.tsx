@@ -60,7 +60,7 @@ export default function Index() {
   const handleConfirm = async (details: CardDetails) => {
     setView("loading");
     try {
-      const data = await analyzeCard(lastFiles, details);
+      const data = await analyzeCard(lastFiles, details, pricing);
       setResult(data);
       setView("report");
 
