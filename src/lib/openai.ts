@@ -210,17 +210,34 @@ export async function analyzeCard(imageFiles: File[]): Promise<GradingResult> {
   } catch (err: any) {
     clearTimeout(timeoutId);
     if (err.name === 'AbortError') {
-      throw new Error("TIMEOUT");
+      const e = new Error("TIMEOUT");
+      (e as any).statusCode = 0;
+      (e as any).detail = "Request aborted after 120s timeout";
+      throw e;
     }
-    throw new Error("API_ERROR");
+    const e = new Error("API_ERROR");
+    (e as any).statusCode = 0;
+    (e as any).detail = err.message || "Network error";
+    throw e;
   }
   clearTimeout(timeoutId);
 
   if (!response.ok) {
+    let detail = `HTTP ${response.status}`;
+    try {
+      const errBody = await response.json();
+      detail = errBody?.error?.message || JSON.stringify(errBody);
+    } catch {}
     if (response.status === 429) {
-      throw new Error("RATE_LIMITED");
+      const e = new Error("RATE_LIMITED");
+      (e as any).statusCode = 429;
+      (e as any).detail = detail;
+      throw e;
     }
-    throw new Error("API_ERROR");
+    const e = new Error("API_ERROR");
+    (e as any).statusCode = response.status;
+    (e as any).detail = detail;
+    throw e;
   }
 
   const data = await response.json();

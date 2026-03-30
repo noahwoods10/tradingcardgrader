@@ -6,18 +6,31 @@ import { analyzeCard, type GradingResult } from "@/lib/openai";
 
 type View = "upload" | "loading" | "report" | "error";
 
+interface DebugInfo {
+  statusCode: number | null;
+  errorMessage: string | null;
+}
+
 export default function Index() {
   const [view, setView] = useState<View>("upload");
   const [result, setResult] = useState<GradingResult | null>(null);
   const [error, setError] = useState<string>("");
+  const [debug, setDebug] = useState<DebugInfo>({ statusCode: null, errorMessage: null });
+
+  const keyStatus = import.meta.env.VITE_OPENAI_API_KEY ? "Key found" : "Key missing";
 
   const handleAnalyze = async (files: File[]) => {
     setView("loading");
+    setDebug({ statusCode: null, errorMessage: null });
     try {
       const data = await analyzeCard(files);
       setResult(data);
       setView("report");
     } catch (err: any) {
+      const statusCode = err.statusCode ?? null;
+      const detail = err.detail ?? err.message ?? "Unknown error";
+      setDebug({ statusCode, errorMessage: detail });
+
       if (err.message === "MISSING_API_KEY") {
         setError("This is usually caused by a missing or invalid API key, or a network issue.\n\nCheck that your VITE_OPENAI_API_KEY is set correctly.");
       } else if (err.message === "PARSE_ERROR") {
@@ -37,10 +50,18 @@ export default function Index() {
     setView("upload");
     setResult(null);
     setError("");
+    setDebug({ statusCode: null, errorMessage: null });
   };
 
   return (
     <div className="min-h-screen flex flex-col">
+      {/* Debug Panel */}
+      <div className="bg-red-600 text-white text-xs font-mono p-3 space-y-1">
+        <p><strong>DEBUG</strong> | API Key: <span className={keyStatus === "Key found" ? "text-green-300" : "text-yellow-300"}>{keyStatus}</span></p>
+        <p>Last API Status: {debug.statusCode !== null ? debug.statusCode : "—"}</p>
+        <p>Last Error: {debug.errorMessage || "—"}</p>
+      </div>
+
       {/* Header */}
       <header className="sticky top-0 z-40 py-4">
         <div className="max-w-[760px] mx-auto px-4 flex items-center justify-between">
