@@ -150,7 +150,7 @@ export default function SlabCarousel() {
       <div
         className="absolute inset-0"
         style={{
-          background: "radial-gradient(ellipse at center, transparent 10%, #0a0a0a 70%)",
+          background: "radial-gradient(ellipse at center, transparent 30%, #0a0a0a 85%)",
         }}
       />
     </div>
