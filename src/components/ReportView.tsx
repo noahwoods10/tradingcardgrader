@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { type GradingResult } from "@/lib/openai";
+import type { CardPricing } from "@/lib/pricing";
 import PackagingModal from "./PackagingModal";
 import MarketOverview from "./report/MarketOverview";
 import GradeValueTable from "./report/GradeValueTable";
@@ -11,6 +12,7 @@ import ServiceLevelCard from "./report/ServiceLevelCard";
 interface ReportViewProps {
   result: GradingResult;
   onReset: () => void;
+  pricing?: CardPricing | null;
 }
 
 function scoreColor(score: number) {
