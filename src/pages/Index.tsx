@@ -11,6 +11,16 @@ import { saveAnalysis } from "@/lib/saveAnalysis";
 import { fetchCardPricing, type CardPricing } from "@/lib/pricing";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 type View = "upload" | "confirm" | "loading" | "report" | "error";
 
@@ -26,6 +36,15 @@ export default function Index() {
   const [identifyResult, setIdentifyResult] = useState<IdentifyResult | null>(null);
   const [pricing, setPricing] = useState<CardPricing | null>(null);
   const [pricingLoading, setPricingLoading] = useState(false);
+  const [confirmLeaveOpen, setConfirmLeaveOpen] = useState(false);
+
+  const handleGoHome = () => {
+    if (view === "loading") {
+      setConfirmLeaveOpen(true);
+    } else {
+      reset();
+    }
+  };
 
   const handleFilesSelected = async (files: File[]) => {
     setLastFiles(files);
@@ -107,17 +126,28 @@ export default function Index() {
       {/* Header */}
       <header className="sticky top-0 z-40 py-4 bg-background/80 backdrop-blur-sm border-b border-border">
         <div className="max-w-[760px] mx-auto px-4 flex items-center justify-between">
-          <span className="text-sm font-medium logo-shimmer tracking-tight">
+          <button
+            onClick={handleGoHome}
+            className="text-sm font-medium logo-shimmer tracking-tight cursor-pointer hover:brightness-125 transition-all min-h-[44px] flex items-center"
+          >
             Trading Card Grader{" "}
             <span className="text-[10px] ml-1 px-1.5 py-0.5 rounded-full bg-purple/20 text-purple inline-block" style={{ color: "#a78bfa" }}>
               TCG
             </span>
-          </span>
+          </button>
           <div className="flex items-center gap-4">
+            {view !== "upload" && (
+              <button
+                onClick={handleGoHome}
+                className="text-xs text-muted-foreground hover:text-foreground transition-colors min-h-[44px] flex items-center"
+              >
+                Home
+              </button>
+            )}
             {user && (
               <button
                 onClick={() => navigate("/history")}
-                className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+                className="text-xs text-muted-foreground hover:text-foreground transition-colors min-h-[44px] flex items-center"
               >
                 History
               </button>
@@ -205,6 +235,23 @@ export default function Index() {
       </footer>
 
       <AuthModal open={authOpen} onClose={() => setAuthOpen(false)} />
+
+      <AlertDialog open={confirmLeaveOpen} onOpenChange={setConfirmLeaveOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Analysis in progress</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to cancel and go home?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Keep waiting</AlertDialogCancel>
+            <AlertDialogAction onClick={() => { setConfirmLeaveOpen(false); reset(); }}>
+              Cancel analysis
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
