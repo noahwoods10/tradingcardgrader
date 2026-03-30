@@ -40,7 +40,7 @@ export default function Index() {
       {/* Header */}
       <header className="sticky top-0 z-40 py-4">
         <div className="max-w-[760px] mx-auto px-4 flex items-center justify-between">
-          <span className="text-sm font-medium text-foreground tracking-tight">SlabReady</span>
+          <span className="text-sm font-medium text-foreground tracking-tight">Trading Card Grader <span className="text-muted-foreground text-[10px] ml-1">TCG</span></span>
           {view === "upload" && (
             <a href="#how" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
               How it works ↓
