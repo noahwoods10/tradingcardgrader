@@ -1,4 +1,5 @@
 // Client-side: calls edge functions for card identification and analysis
+import type { CardPricing } from "@/lib/pricing";
 
 export interface CardDetails {
   cardName: string;
