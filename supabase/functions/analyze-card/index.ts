@@ -311,7 +311,7 @@ serve(async (req) => {
                 ...imageContents,
                 {
                   type: 'text',
-                  text: buildUserPrompt(images.length, cardDetails),
+                  text: buildUserPrompt(images.length, cardDetails, pricing),
                 },
               ],
             },
