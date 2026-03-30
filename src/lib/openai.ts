@@ -68,7 +68,7 @@ export interface GradingResult {
   confidence_note: string;
 }
 
-async function compressImage(file: File, maxDim = 1500, quality = 0.85): Promise<string> {
+async function compressImage(file: File, maxDim = 1200, quality = 0.80): Promise<string> {
   return new Promise((resolve, reject) => {
     const img = new Image();
     const url = URL.createObjectURL(file);

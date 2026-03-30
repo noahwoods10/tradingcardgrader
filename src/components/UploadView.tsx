@@ -13,7 +13,7 @@ const tips = [
 ];
 
 const howItWorks = [
-  "Upload photos — front, back, raking light shots, corner close-ups",
+  "Upload up to 20 images — front, back, all 4 corners, raking light shots at multiple angles for the most accurate analysis",
   "AI analyzes — centering, corners, edges, and surface scored independently using PSA 2025 standards",
   "Get your report — grade prediction with probability breakdown, ROI estimate, and specific tips",
   "Submit with confidence — know what to expect before you pay grading fees",
