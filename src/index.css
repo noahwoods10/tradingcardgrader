@@ -161,9 +161,15 @@
     100% { transform: translateY(0); }
   }
   .carousel-col-up {
-    animation: scroll-up 30s linear infinite;
+    animation: scroll-up 40s linear infinite;
   }
   .carousel-col-down {
-    animation: scroll-down 30s linear infinite;
+    animation: scroll-down 40s linear infinite;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .carousel-col-up,
+    .carousel-col-down {
+      animation: none;
+    }
   }
 }
