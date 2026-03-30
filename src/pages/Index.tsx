@@ -27,7 +27,7 @@ export default function Index() {
       } else if (err.message === "RATE_LIMITED") {
         setError("API rate limit reached. Please wait a minute and try again.\n\nThis happens when too many requests are sent in a short time.");
       } else {
-        setError("This is usually caused by a missing or invalid API key, or a network issue.\n\nCheck that your VITE_GEMINI_API_KEY is set correctly.");
+        setError("This is usually caused by a missing or invalid API key, or a network issue.\n\nCheck that your VITE_OPENAI_API_KEY is set correctly.");
       }
       setView("error");
     }
