@@ -51,6 +51,8 @@ export default function ConfirmView({
   files,
   identifyResult,
   identifying,
+  pricing,
+  pricingLoading,
   onBack,
   onConfirm,
   onSkip,
