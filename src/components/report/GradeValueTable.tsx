@@ -40,7 +40,7 @@ export default function GradeValueTable({ result, pricing }: { result: GradingRe
     },
     {
       grade: "Raw NM",
-      value: result.raw_value_estimate,
+      value: rawDisplay || result.raw_value_estimate,
       multiplier: null,
       probability: 0,
       color: "muted-foreground",
