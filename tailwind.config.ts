@@ -4,11 +4,13 @@ export default {
   darkMode: ["class"],
   content: ["./pages/**/*.{ts,tsx}", "./components/**/*.{ts,tsx}", "./app/**/*.{ts,tsx}", "./src/**/*.{ts,tsx}"],
   safelist: [
-    "bg-green", "bg-amber", "bg-red", "bg-blue",
-    "score-green", "score-amber", "score-red",
+    "bg-green", "bg-amber", "bg-red", "bg-blue", "bg-purple",
+    "score-green", "score-amber", "score-red", "score-blue",
     "score-badge-green", "score-badge-amber", "score-badge-red",
     "border-l-green", "border-l-amber", "border-l-red",
-    "text-green", "text-amber", "text-red", "text-blue",
+    "text-green", "text-amber", "text-red", "text-blue", "text-purple",
+    "verdict-glow-green", "verdict-glow-amber", "verdict-glow-red",
+    "category-centering", "category-corners", "category-edges", "category-surface",
   ],
   theme: {
     container: {
