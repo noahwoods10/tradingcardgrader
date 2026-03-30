@@ -8,6 +8,7 @@ import ReportView from "@/components/ReportView";
 import AuthModal from "@/components/AuthModal";
 import { analyzeCard, identifyCard, clearImageCache, type GradingResult, type IdentifyResult } from "@/lib/openai";
 import { saveAnalysis } from "@/lib/saveAnalysis";
+import { fetchCardPricing, type CardPricing } from "@/lib/pricing";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 
