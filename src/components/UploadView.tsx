@@ -29,7 +29,7 @@ export default function UploadView({ onAnalyze }: UploadViewProps) {
     const arr = Array.from(newFiles).filter((f) =>
       ["image/jpeg", "image/png", "image/webp"].includes(f.type)
     );
-    setFiles((prev) => [...prev, ...arr].slice(0, 6));
+    setFiles((prev) => [...prev, ...arr].slice(0, 20));
   }, []);
 
   const removeFile = (idx: number) => setFiles((prev) => prev.filter((_, i) => i !== idx));
