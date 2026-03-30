@@ -46,7 +46,7 @@ export default function Index() {
           .finally(() => setPricingLoading(false));
       }
     } catch {
-      setIdentifyResult({ card_name: null, set_name: null, card_number: null, year: null, rarity: null, confidence: "LOW", confidence_note: "Identification failed" });
+      setIdentifyResult({ card_name: null, set_name: null, card_number: null, year: null, rarity: null, art_style: null, confidence: "LOW", confidence_note: "Identification failed", identification_reasoning: null });
     } finally {
       setIdentifying(false);
     }
